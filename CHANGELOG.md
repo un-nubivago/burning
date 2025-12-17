@@ -2,7 +2,29 @@
 
 ## [Unreleased]
 
-## [1.0] - 2025-06-13
+## [1.1][1.1+1.21.6] - 2025-08-17
+
+### Changed
+
++ Update to Minecraft 1.21.6 as minimum version.
+
+### Added
+
++ Add more standalone handle methods for the serialization and deserialization of `BurningStorage` classes.
+
+## [1.0][1.0+1.21.4] - 2025-06-24
+
+### Changed
+
++ Change fields name following minecraft 1.21.4 changes.
+
+## [1.0][1.0+1.21.2] - 2025-06-23
+
+### Changed
+
++ Update implementation for 1.21.2 changes.
+
+## [1.0][1.0+1.21] - 2025-06-13
 
 ### Changed
 
@@ -37,8 +59,11 @@
 
 Alpha release.
 
-[0.1]: https://github.com/NivOridocs/burning/releases/tag/0.1
-[0.2]: https://github.com/NivOridocs/burning/releases/tag/0.2
-[0.3]: https://github.com/NivOridocs/burning/releases/tag/0.3
+[1.1+1.21.6]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21.4
+[1.0+1.21.4]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21.4
+[1.0+1.21.2]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21.2
+[1.0+1.21]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21
 [0.4]: https://github.com/NivOridocs/burning/releases/tag/0.4
-[1.0]: https://github.com/NivOridocs/burning/releases/tag/1.0
+[0.3]: https://github.com/NivOridocs/burning/releases/tag/0.3
+[0.2]: https://github.com/NivOridocs/burning/releases/tag/0.2
+[0.1]: https://github.com/NivOridocs/burning/releases/tag/0.1

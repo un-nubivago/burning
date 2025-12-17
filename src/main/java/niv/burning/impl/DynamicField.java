@@ -4,12 +4,9 @@ import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import com.google.common.collect.ImmutableMap;
 
-@ApiStatus.Internal
-public abstract class DynamicField {
+abstract class DynamicField {
 
     private static final ImmutableMap<Class<?>, Function<Field, ? extends DynamicField>> MAP;
 

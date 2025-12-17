@@ -2,6 +2,8 @@ package niv.burning.api;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import niv.burning.impl.BurningContextFactory;
 
 /**
  * Represents a context for determining fuel status and burn duration for items and item stacks.
@@ -46,4 +48,13 @@ public interface BurningContext {
      * @return a non-negative integer: the burn duration for the provided {@link ItemStack} in this context
      */
     int burnDuration(ItemStack itemStack);
+
+    @Deprecated
+    static BurningContext defaultContext() {
+        return BurningContextFactory.defaultContext();
+    }
+
+    static BurningContext worldlyContext(Level level) {
+        return BurningContextFactory.worldlyContext(level);
+    }
 }

@@ -17,7 +17,7 @@ import niv.burning.impl.AbstractFurnaceBlockEntityExtension;
 import niv.burning.impl.AbstractFurnaceBurningStorage;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
-public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExtension {
+class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExtension {
 
     private static final String LEVEL = "Lnet/minecraft/world/level/Level;";
     private static final String BLOCK_POS = "Lnet/minecraft/core/BlockPos;";
@@ -27,7 +27,8 @@ public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEnti
 
     @Unique
     @SuppressWarnings("java:S116")
-    private final BurningStorage burning_burningStorage = new AbstractFurnaceBurningStorage((AbstractFurnaceBlockEntity) (Object) this);
+    private final BurningStorage burning_burningStorage = new AbstractFurnaceBurningStorage(
+            (AbstractFurnaceBlockEntity) (Object) this);
 
     @Unique
     @SuppressWarnings("java:S116")
