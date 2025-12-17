@@ -1,21 +1,23 @@
 {
     "schemaVersion": 1,
     "id": "burning",
-    "version": "${version}",
+    "version": "${mod_version}",
     "name": "Burning",
     "description": "A library mod to access and transfer the burning fuel between furnace-like blocks of all mods.",
     "authors": [
-        "Niv Oridocs"
+        "Nubìvago"
     ],
     "contact": {
         "homepage": "https://modrinth.com/mod/burning",
         "sources": "https://github.com/NivOridocs/burning"
     },
     "custom": {
-		"loom:injected_interfaces": {
-			"net/minecraft/class_2609": ["niv/burning/impl/AbstractFurnaceBlockEntityExtension"]
-		}
-	},
+        "loom:injected_interfaces": {
+            "net/minecraft/class_2609": [
+                "niv/burning/impl/AbstractFurnaceBlockEntityExtension"
+            ]
+        }
+    },
     "license": "MIT",
     "icon": "assets/burning/icon.png",
     "environment": "*",
@@ -29,9 +31,9 @@
         "burning.mixins.json"
     ],
     "depends": {
-        "fabricloader": ">=0.17.2",
-		"minecraft": "~1.21.6",
-		"java": ">=21",
-		"fabric-api": "*"
+        "fabricloader": ">=${loader_version}",
+        "minecraft": "~${minecraft_version}",
+        "java": ">=21",
+        "fabric-api": ">=${fabric_version}"
     }
 }
