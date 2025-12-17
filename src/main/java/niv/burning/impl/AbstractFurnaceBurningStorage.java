@@ -1,5 +1,7 @@
 package niv.burning.impl;
 
+import org.jetbrains.annotations.ApiStatus.Internal;
+
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.item.Item;
@@ -12,6 +14,7 @@ import niv.burning.api.BurningStorageHelper;
 import niv.burning.api.base.SimpleBurningStorage;
 import niv.burning.api.base.SimpleBurningStorage.Snapshot;
 
+@Internal
 public class AbstractFurnaceBurningStorage
         extends SnapshotParticipant<SimpleBurningStorage.Snapshot>
         implements BurningStorage {

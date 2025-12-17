@@ -1,7 +1,5 @@
 package niv.burning.impl;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -10,8 +8,7 @@ import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
 import niv.burning.api.BurningStorageHelper;
 
-@ApiStatus.Internal
-public class DynamicBurningStorage
+class DynamicBurningStorage
         extends SnapshotParticipant<DynamicBurningStorage.Snapshot>
         implements BurningStorage {
 

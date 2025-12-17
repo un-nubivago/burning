@@ -17,7 +17,7 @@ import niv.burning.impl.AbstractFurnaceBlockEntityExtension;
 import niv.burning.impl.AbstractFurnaceBurningStorage;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
-public class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExtension {
+class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExtension {
 
     private static final String BLOCK_POS = "Lnet/minecraft/core/BlockPos;";
     private static final String BLOCK_STATE = "Lnet/minecraft/world/level/block/state/BlockState;";

@@ -9,8 +9,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import niv.burning.api.Burning;
+import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
-import niv.burning.impl.FuelValuesBurningContext;
 
 @SuppressWarnings("java:S2187")
 public class BurningGameTest {
@@ -38,7 +38,7 @@ public class BurningGameTest {
     private void testCommonBurningStorage(GameTestHelper game) {
         game.assertBlockProperty(POS, BlockStateProperties.LIT, Boolean.FALSE);
 
-        final var context = new FuelValuesBurningContext(game.getLevel().fuelValues());
+        final var context = BurningContext.worldlyContext(game.getLevel());
         game.assertTrue(context != null,
                 literal("Expected BurningContext, get null"));
 
