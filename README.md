@@ -71,8 +71,8 @@ How to do so.
 
 For every such block entity, you must figure out a couple of things beforehand, that is:
 * The name of that block entity's type.
-* The name of the field of that block entity that is functionally equivalent to `AbstractFurnaceBlockEntity.litTime` (Mojang mappings' name).
-* The name of the field of that block entity that is functionally equivalent to `AbstractFurnaceBlockEntity.litDuration` (Mojang mappings' name).
+* The name of the field of that block entity that is functionally equivalent to `AbstractFurnaceBlockEntity.litTimeRemaining` (Mojang mappings' name, `litTime` before 1.21.4).
+* The name of the field of that block entity that is functionally equivalent to `AbstractFurnaceBlockEntity.litTotalTime` (Mojang mappings' name, `litDuration` before 1.21.4).
 
 Then you must create a data pack like the one in the following example.
 
@@ -105,9 +105,9 @@ Where each `*.json` file shall look something like this (comments are for illust
 {
     // The name of that block entity's type
     "type": "example_mod:custom_furnace_entity_type",
-    // The name of the field of that block entity that is functionally equivalent to `litTime`
+    // The name of the field of that block entity that is functionally equivalent to `litTimeRemaining`
     "lit_time": "burnTime",
-    // The name of the field of that block entity that is functionally equivalent to `litDuration`
+    // The name of the field of that block entity that is functionally equivalent to `litTotalTime`
     "lit_duration": "fuelTime"
 }
 ```
@@ -169,15 +169,14 @@ import niv.burning.api.Burning;
 import niv.burning.api.BurningStorage;
 
 // What you need
-Level world; // before 1.21.2
-ServerLevel world; // after 1.21.2
+Level level;
 BurningStorage source, target;
 
 // Before 1.21.2, create a burning context, you can use the SimpleBurningContext class or implement one yourself
 BurningContext context = ...;
 
 // After 1.21.2, you can also use the FuelValuesBurningContext wrapper class
-BurningContext context = new FuelValuesBurningContext(world.fuelValues());
+BurningContext context = new FuelValuesBurningContext(level.fuelValues());
 
 // Create the maximum amount of burning fuel to transfer, for instance, half a COAL worth of burning fuel
 Burning burning = Burning.of(Items.COAL, context).withValue(800, context);
@@ -200,15 +199,11 @@ Transfer an exact amount or nothing:
 import niv.burning.api.Burning;
 import niv.burning.api.BurningStorage;
 
+Level level;
 BurningStorage source, target;
+BurningContext context;
 
-Burning burning = Burning.COAL.withValue(800);
-
-// Before 1.21.2, create a burning context, you can use the SimpleBurningContext class or implement one yourself
-BurningContext context = ...;
-
-// After 1.21.2, you can also use the FuelValuesBurningContext wrapper class
-BurningContext context = new FuelValuesBurningContext(world.fuelValues());
+Burning burning = Burning.COAL.withValue(800, context);
 
 try (Transaction transaction = Transaction.openOuter()) {
     Burning transferred = BurningStorage.transfer(source, target, burning, context, transaction);
@@ -222,29 +217,50 @@ Read the Fabric's Transaction API to understand the last example better.
 
 ### Use a burning storage in your block entity (for mod developers)
 
-Instead of implementing the two fields functionally equivalent to `AbstractFurnaceBlockEntity`'s `litTime` and `litDuration`, do the following:
+Instead of implementing the two fields functionally equivalent to `AbstractFurnaceBlockEntity`'s `litTimeRemaining` and `litTotalTime`, do the following:
 
 ```java
+
+import niv.burning.api.BurningStorage;
+import niv.burning.api.BurningStorageHelper;
+import niv.burning.api.BurningStorageListener;
 import niv.burning.api.base.SimpleBurningStorage;
 
-public class NewBlockEntity extends BlockEntity {
+public class MyBlockEntity extends BlockEntity implements BurningStorageListener {
+    
     // Add a simple burning storage to the entity
-    public final SimpleBurningStorage simpleBurningStorage = SimpleBurningStorage.getForBlockEntity(this, i -> i);
+    public final SimpleBurningStorage simpleBurningStorage = new SimpleBurningStorage();
 
-    // (Optional) Add a simple container data for the burning storage
-    public final ContainerData containerData = SimpleBurningStorage.getDefaultContainerData(this.simpleBurningStorage);
-
-    // And don't forget to add the following
-    @Override
-    protected void loadAdditional(CompoundTag compoundTag, Provider provider) {
+    public MyBlockEntity(...) {
         // ...
-        this.simpleBurningStorage.load(compoundTag, provider);
+        // Add this to register this entity for changes in the simpleBurningStorage
+        this.simpleBurningStorage.addListener(this);
+    }
+
+    // Add this as a callback
+    @Override
+    public void burningStorageChanged(BurningStorage burningStorage) {
+        // Update this entity LIT property (if any) so to match if the given burningStorage is burning
+        BurningStorageHelper.tryUpdateLitProperty(this, burningStorage);
+        this.setChanged();
+    }
+
+    // And don't forget to add the following for saving and loading the simpleBurningStorage state
+    @Override
+    protected void loadAdditional(ValueInput valueInput) {
+        super.loadAdditional(valueInput);
+        // ...
+        valueInput
+                .read("Burning", SimpleBurningStorage.SNAPSHOT_CODEC)
+                .ifPresent(this.simpleBurningStorage::readSnapshot);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag, Provider provider) {
+    protected void saveAdditional(ValueOutput valueOutput) {
+        super.saveAdditional(valueOutput);
         // ...
-        this.simpleBurningStorage.save(compoundTag, provider);
+        valueOutput
+                .store("Burning", SimpleBurningStorage.SNAPSHOT_CODEC, this.simpleBurningStorage.createSnapshot());
     }
 }
 ```
@@ -255,17 +271,17 @@ Don't forget to register it:
 import niv.burning.api.BurningStorage;
 
 // What you need
-BlockEntityType<NewBlockEntity> NEW_BLOCK_ENTITY;
+BlockEntityType<MyBlockEntity> MY_BLOCK_ENTITY = ...;
 
 // How to
-BurningStorage.SIDED.registerForBlockEntity((newBlockEntity, direction) -> newBlockEntity.burningStorage, NEW_BLOCK_ENTITY);
+BurningStorage.SIDED.registerForBlockEntity((myBlockEntity, direction) -> myBlockEntity.simpleBurningStorage, MY_BLOCK_ENTITY);
 ```
 
-Then you can access the equivalent `litTime` and `litDuration` like:
+Then you can access the equivalent `litTimeRemaining` and `litTotalTime` like:
 
 ```java
-this.burningStorage.getCurrentBurning(); // as the `litTime` equivalent
-this.burningStorage.setCurrentBurning(800);
-this.burningStorage.getMaxBurning(); // as the `litDuration` equivalent
-this.burningStorage.setMaxBurning(1600);
+this.simpleBurningStorage.getCurrentBurning(); // as the `litTimeRemaining` equivalent
+this.simpleBurningStorage.setCurrentBurning(800);
+this.simpleBurningStorage.getMaxBurning(); // as the `litTotalTime` equivalent
+this.simpleBurningStorage.setMaxBurning(1600);
 ```

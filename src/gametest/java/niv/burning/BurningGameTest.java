@@ -1,4 +1,4 @@
-package niv.burning.gametest;
+package niv.burning;
 
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -8,10 +8,11 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import niv.burning.api.Burning;
+import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
-import niv.burning.impl.FuelValuesBurningContext;
 
-public class GameTestBurningRegistrar {
+@SuppressWarnings("java:S2187")
+public class BurningGameTest {
 
     private static final BlockPos POS = new BlockPos(0, 1, 0);
 
@@ -36,13 +37,11 @@ public class GameTestBurningRegistrar {
     private void testCommonBurningStorage(GameTestHelper game) {
         game.assertBlockProperty(POS, BlockStateProperties.LIT, Boolean.FALSE);
 
-        final var context = new FuelValuesBurningContext(game.getLevel().fuelValues());
-        game.assertTrue(context != null,
-                "Expected BurningContext, get null");
+        final var context = BurningContext.worldlyContext(game.getLevel());
+        game.assertTrue(context != null, "Expected BurningContext, get null");
 
         final var storage = BurningStorage.SIDED.find(game.getLevel(), game.absolutePos(POS), null);
-        game.assertTrue(storage != null,
-                "Expected BurningStorage, get null");
+        game.assertTrue(storage != null, "Expected BurningStorage, get null");
         game.assertTrue(storage.getBurning(context).getValue(context).intValue() == 0,
                 "Expected 0, got " + storage.getBurning(context).getValue(context).intValue());
 

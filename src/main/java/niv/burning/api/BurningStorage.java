@@ -92,6 +92,19 @@ public interface BurningStorage {
     Burning getBurning(BurningContext context);
 
     /**
+     * Indicates whether this storage is currently in a burning state.
+     * <p>
+     * This typically means whether the storage contains a non-zero {@link Burning} value
+     * that is presently active or being consumed/used for burning operations. Implementations
+     * should return true if they should be considered actively burning (e.g., a generator
+     * is currently producing energy from fuel), false otherwise.
+     * </p>
+     *
+     * @return true if this storage is actively burning, false if not
+     */
+    boolean isBurning();
+
+    /**
      * Transfers {@link Burning} between two burning storages, and returns the amount
      * that was successfully transferred.
      *

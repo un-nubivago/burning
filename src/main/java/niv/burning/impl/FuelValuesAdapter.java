@@ -4,21 +4,22 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.FuelValues;
 import niv.burning.api.BurningContext;
 
-public class FuelValuesBurningContext implements BurningContext {
+final class FuelValuesAdapter extends FuelValues {
 
-    private final FuelValues values;
+    private final BurningContext context;
 
-    public FuelValuesBurningContext(FuelValues values) {
-        this.values = values;
+    FuelValuesAdapter(BurningContext context) {
+        super(null);
+        this.context = context;
     }
 
     @Override
     public boolean isFuel(ItemStack itemStack) {
-        return this.values.isFuel(itemStack);
+        return this.context.isFuel(itemStack);
     }
 
     @Override
     public int burnDuration(ItemStack itemStack) {
-        return this.values.burnDuration(itemStack);
+        return this.context.burnDuration(itemStack);
     }
 }

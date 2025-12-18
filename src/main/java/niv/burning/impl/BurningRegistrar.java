@@ -3,8 +3,6 @@ package niv.burning.impl;
 import static niv.burning.impl.BurningImpl.LOGGER;
 import static niv.burning.impl.BurningImpl.MOD_NAME;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStarting;
 import net.fabricmc.fabric.mixin.lookup.BlockEntityTypeAccessor;
 import net.minecraft.core.BlockPos;
@@ -18,8 +16,7 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import niv.burning.api.BurningStorage;
 
-@ApiStatus.Internal
-public final class BurningRegistrar implements ServerStarting {
+final class BurningRegistrar implements ServerStarting {
 
     BurningRegistrar() {
     }

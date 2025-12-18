@@ -1,18 +1,14 @@
 package niv.burning.impl;
 
-import static net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT;
-
-import org.jetbrains.annotations.ApiStatus;
-
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
+import niv.burning.api.BurningStorageHelper;
 
-@ApiStatus.Internal
-public class DynamicBurningStorage
+class DynamicBurningStorage
         extends SnapshotParticipant<DynamicBurningStorage.Snapshot>
         implements BurningStorage {
 
@@ -92,6 +88,11 @@ public class DynamicBurningStorage
     }
 
     @Override
+    public boolean isBurning() {
+        return this.burning() > 0d;
+    }
+
+    @Override
     protected Snapshot createSnapshot() {
         return new Snapshot(burning(), maxBurning(), zero);
     }
@@ -105,13 +106,7 @@ public class DynamicBurningStorage
 
     @Override
     protected void onFinalCommit() {
-        var state = this.target.level.getBlockState(this.target.worldPosition);
-        var wasBurning = state.getValue(LIT).booleanValue();
-        var isBurning = burning() > 0;
-        if (wasBurning != isBurning) {
-            state = state.setValue(LIT, isBurning);
-            this.target.level.setBlockAndUpdate(this.target.worldPosition, state);
-            BlockEntity.setChanged(this.target.level, this.target.worldPosition, state);
-        }
+        BurningStorageHelper.tryUpdateLitProperty(this.target, this);
+        this.target.setChanged();
     }
 }
