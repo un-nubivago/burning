@@ -1,11 +1,11 @@
 package niv.burning.impl;
 
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 import net.minecraft.world.item.Item;
 import niv.burning.api.BurningStorage;
 
-@ApiStatus.Internal
+@Internal
 @SuppressWarnings("java:S100")
 public interface AbstractFurnaceBlockEntityExtension {
 

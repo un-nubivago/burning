@@ -49,4 +49,9 @@ public class ForwardingBurningStorage implements BurningStorage {
     public Burning getBurning(BurningContext context) {
         return this.target.get().getBurning(context);
     }
+
+    @Override
+    public boolean isBurning() {
+        return this.target.get().isBurning();
+    }
 }
