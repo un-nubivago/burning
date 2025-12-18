@@ -4,11 +4,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.FuelValues;
 import niv.burning.api.BurningContext;
 
-final class ForwardingFuelValues extends FuelValues {
+final class FuelValuesAdapter extends FuelValues {
 
     private final BurningContext context;
 
-    ForwardingFuelValues(BurningContext context) {
+    FuelValuesAdapter(BurningContext context) {
         super(null);
         this.context = context;
     }

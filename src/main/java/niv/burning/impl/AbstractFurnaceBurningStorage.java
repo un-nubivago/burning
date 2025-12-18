@@ -120,12 +120,12 @@ public class AbstractFurnaceBurningStorage
 
         @Override
         public int burnDuration(Item item) {
-            return this.target.getBurnDuration(new ForwardingFuelValues(this.source), new ItemStack(item));
+            return this.target.getBurnDuration(new FuelValuesAdapter(this.source), new ItemStack(item));
         }
 
         @Override
         public int burnDuration(ItemStack itemStack) {
-            return this.target.getBurnDuration(new ForwardingFuelValues(this.source), itemStack);
+            return this.target.getBurnDuration(new FuelValuesAdapter(this.source), itemStack);
         }
     }
 }
