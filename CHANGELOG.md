@@ -8,6 +8,10 @@
 + Added static constructor in `SimpleBurningContext` for fuel mappings equal to the legacy (pre Minecraft 1.21.2) ones.
 + Added static constructors for `BurningContext`.
 
+### Removed
+
++ Removed `BurningStorageListener` for a more streamlined experience.
+
 ## [1.1][1.1+1.21.6] - 2025-08-17
 
 ### Changed
