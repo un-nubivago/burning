@@ -1,7 +1,6 @@
 package niv.burning.impl;
 
 import static niv.burning.impl.BurningImpl.LOGGER;
-import static niv.burning.impl.BurningImpl.MOD_NAME;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStarting;
 import net.fabricmc.fabric.mixin.lookup.BlockEntityTypeAccessor;
@@ -14,6 +13,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import niv.burning.api.BurningPropagator;
 import niv.burning.api.BurningStorage;
 
 final class BurningRegistrar implements ServerStarting {
@@ -25,6 +25,7 @@ final class BurningRegistrar implements ServerStarting {
     public void onServerStarting(MinecraftServer server) {
         registerAbstractFurnaceBurningStorages(server.registryAccess());
         registerDynamicBurningStorages(server.registryAccess());
+        registerBurningPropagators(server.registryAccess());
     }
 
     private void registerAbstractFurnaceBurningStorages(RegistryAccess registries) {
@@ -57,16 +58,32 @@ final class BurningRegistrar implements ServerStarting {
                 });
     }
 
+    private void registerBurningPropagators(RegistryAccess registries) {
+        var eligibleBlocks = registries.lookupOrThrow(Registries.BLOCK).stream()
+                .filter(BurningPropagator.class::isInstance)
+                .toArray(Block[]::new);
+        if (eligibleBlocks.length > 0) {
+            BurningPropagator.SIDED.registerForBlocks((world, pos, state, blockEntity, context) -> {
+                if (state.getBlock() instanceof BurningPropagator propagator) {
+                    return propagator;
+                } else {
+                    return null;
+                }
+            }, eligibleBlocks);
+        }
+    }
+
     private boolean byEntity(Block block) {
         try {
-            if (block instanceof EntityBlock entityBlock) {
-                return entityBlock.newBlockEntity(BlockPos.ZERO, block.defaultBlockState()) instanceof AbstractFurnaceBlockEntity;
+            if (block instanceof EntityBlock e) {
+                return e.newBlockEntity(BlockPos.ZERO, block.defaultBlockState()) instanceof AbstractFurnaceBlockEntity;
+            } else {
+                return false;
             }
-            return false;
         } catch (RuntimeException rex) {
             LOGGER.warn(
-                    "[{}] Cannot create an entity from {} due to a runtime exception, skipped. Exception message: {}",
-                    MOD_NAME, block, rex.getMessage());
+                    "Cannot create an entity from {} due to a runtime exception, skipped. Exception message: {}",
+                    block, rex.getMessage(), rex);
             return false;
         }
     }
