@@ -3,7 +3,7 @@
 # certain platforms or Java versions, and provides a first line of defense
 # against bad commits.
 
-name: Burning Build Workflow
+name: Release on Modrinth
 on:
   push:
     branches:
