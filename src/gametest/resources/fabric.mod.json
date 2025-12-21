@@ -7,7 +7,7 @@
     "environment": "*",
     "entrypoints": {
         "fabric-gametest": [
-            "niv.burning.BurningGameTest"
+            "niv.burning.VanillaBurningStorageGameTest"
         ]
     }
 }
