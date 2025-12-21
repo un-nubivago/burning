@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.entity.FuelValues;
 import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
-import niv.burning.api.BurningStorageHelper;
+import niv.burning.api.BurningStorageUtil;
 import niv.burning.api.base.SimpleBurningStorage;
 import niv.burning.api.base.SimpleBurningStorage.Snapshot;
 
@@ -94,7 +94,7 @@ public class AbstractFurnaceBurningStorage
 
     @Override
     protected void onFinalCommit() {
-        BurningStorageHelper.tryUpdateLitProperty(this.target, this);
+        BurningStorageUtil.tryUpdateLitProperty(this.target, this);
         this.target.setChanged();
     }
 

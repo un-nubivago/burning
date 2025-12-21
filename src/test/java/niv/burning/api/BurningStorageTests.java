@@ -148,12 +148,12 @@ class BurningStorageTests {
         assertEquals(0, target.getBurning(context).getValue(context).intValue());
 
         try (var transaction = Transaction.openOuter()) {
-            assertEquals(blaze10, BurningStorage.transfer(source, target, blaze12, context, transaction));
+            assertEquals(blaze10, BurningStorageUtil.transfer(source, target, blaze12, context, transaction));
             transaction.commit();
         }
 
         try (var transaction = Transaction.openOuter()) {
-            assertEquals(blaze8, BurningStorage.transfer(target, source, blaze8, context, transaction));
+            assertEquals(blaze8, BurningStorageUtil.transfer(target, source, blaze8, context, transaction));
             transaction.commit();
         }
     }

@@ -1,10 +1,8 @@
 package niv.burning.api;
 
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.include.com.google.common.base.Objects;
 
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -151,36 +149,4 @@ public interface BurningStorage {
      * @return true if this storage is actively burning, false if not
      */
     boolean isBurning();
-
-    /**
-     * Transfers {@link Burning} between two burning storages, and returns the amount
-     * that was successfully transferred.
-     *
-     * @param from        the source storage (may be null)
-     * @param to          the target storage (may be null)
-     * @param burning     the maximum burning that may be moved
-     * @param context     the {@link BurningContext} to use
-     * @param transaction the transaction this transfer is part of,
-     *                    or {@code null} if a transaction should be opened just for
-     *                    this transfer
-     * @return the amount of {@link Burning} that was successfully transferred
-     */
-    public static Burning transfer(
-            @Nullable BurningStorage from, @Nullable BurningStorage to,
-            Burning burning, BurningContext context, @Nullable TransactionContext transaction) {
-        if (from != null && to != null) {
-            Burning extracted;
-            try (var test = Transaction.openNested(transaction)) {
-                extracted = from.extract(burning, context, test);
-            }
-            try (var actual = Transaction.openNested(transaction)) {
-                var inserted = to.insert(extracted, context, actual);
-                if (Objects.equal(inserted, from.extract(inserted, context, actual))) {
-                    actual.commit();
-                    return inserted;
-                }
-            }
-        }
-        return burning.zero();
-    }
 }
