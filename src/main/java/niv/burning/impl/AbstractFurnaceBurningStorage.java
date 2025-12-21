@@ -53,17 +53,13 @@ public class AbstractFurnaceBurningStorage
     }
 
     @Override
+    public boolean supportsExtraction() {
+        return false;
+    }
+
+    @Override
     public Burning extract(Burning burning, BurningContext context, TransactionContext transaction) {
-        context = new Context(this.target, context);
-        int fuelTime = burning.getBurnDuration(context);
-        int value = Math.min(this.target.litTimeRemaining, burning.getValue(context).intValue());
-        updateSnapshots(transaction);
-        this.target.litTimeRemaining -= value;
-        if (this.target.litTotalTime > fuelTime && this.target.litTimeRemaining <= fuelTime) {
-            this.target.litTotalTime = fuelTime;
-            this.setZero(burning);
-        }
-        return burning.withValue(value, context);
+        return burning.zero();
     }
 
     @Override

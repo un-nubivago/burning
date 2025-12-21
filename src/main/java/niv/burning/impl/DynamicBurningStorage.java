@@ -15,7 +15,7 @@ public class DynamicBurningStorage
         extends SnapshotParticipant<DynamicBurningStorage.Snapshot>
         implements BurningStorage {
 
-    static final record Snapshot(double burning, double maxBurning, Burning zero) {
+    public static final record Snapshot(double burning, double maxBurning, Burning zero) {
     }
 
     private final DynamicBurningStorageProvider provider;
@@ -67,18 +67,13 @@ public class DynamicBurningStorage
     }
 
     @Override
+    public boolean supportsExtraction() {
+        return false;
+    }
+
+    @Override
     public Burning extract(Burning burning, BurningContext context, TransactionContext transaction) {
-        double currentBurning = burning();
-        int fuelTime = burning.getBurnDuration(context);
-        double value = Math.min(currentBurning, burning.getValue(context));
-        updateSnapshots(transaction);
-        currentBurning -= value;
-        burning(currentBurning);
-        if (maxBurning() > fuelTime && currentBurning <= fuelTime) {
-            maxBurning(fuelTime);
-            this.zero = burning.zero();
-        }
-        return burning.withValue((int) value, context);
+        return burning.zero();
     }
 
     @Override

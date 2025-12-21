@@ -3,6 +3,7 @@ package niv.burning.api.base;
 import java.util.Map;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.ItemTags;
@@ -43,6 +44,15 @@ public class SimpleBurningContext implements BurningContext {
         this();
         if (values != null)
             this.values.putAll(values);
+    }
+
+    /**
+     * Gets an unmodifiable view of this context backing map.
+     *
+     * @return an unmodifiable view
+     */
+    public Object2IntMap<Item> getValues() {
+        return Object2IntMaps.unmodifiable(this.values);
     }
 
     @Override
