@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+
++ Burning storages of block entities extending `AbstractFurnaceBlockEntity` are now insertion-only, the same goes for dynamically registered ones.
++ Changed `EmptyBurningStorage` from class to anonymous singleton `EMPTY` field within `BurningStorage` interface.
++ Moved function `transfer` from `BurningStorage` to `BurningStorageUtil`.
++ Renamed `BurningStorageHelper` to `BurningStorageUtil`.
++ Renamed `ForwardingBurningStorage` to `DelegatingBurningStorage` to mirror other APIs naming schemas.
+
 ### Added
 
 + Added `BurningPropagator` block API.
@@ -10,7 +18,7 @@
 
 ### Removed
 
-+ Removed `BurningStorageListener` for a more streamlined experience.
++ Removed `BurningStorageListener` for a more streamlined interface.
 
 ## [1.1][1.1+1.21.6] - 2025-08-17
 
