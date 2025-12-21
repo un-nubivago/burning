@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -28,8 +29,8 @@ class BurningStorageTests {
 
     @Test
     void testSimpleBurningStorage() {
-        testBurningStorage(SimpleBurningStorage::new);
-        testBurningStorage(() -> new SimpleBurningStorage(i -> i / 2));
+        testBurningStorage(BurningStorageTests::newBurningStorage);
+        testBurningStorage(() -> BurningStorageTests.newBurningStorage(i -> i / 2));
     }
 
     @Test
@@ -108,8 +109,8 @@ class BurningStorageTests {
     }
 
     private void testTransfer(Supplier<? extends BurningStorage> constructor) {
-        testTransfer(constructor, SimpleBurningStorage::new);
-        testTransfer(constructor, () -> new SimpleBurningStorage(i -> i / 2));
+        testTransfer(constructor, BurningStorageTests::newBurningStorage);
+        testTransfer(constructor, () -> BurningStorageTests.newBurningStorage(i -> i / 2));
 
         testTransfer(constructor, AbstractFurnaceBurningStorages::createFurnace);
         testTransfer(constructor, AbstractFurnaceBurningStorages::createBlastFurnace);
@@ -155,5 +156,23 @@ class BurningStorageTests {
             assertEquals(blaze8, BurningStorage.transfer(target, source, blaze8, context, transaction));
             transaction.commit();
         }
+    }
+
+    private static final BurningStorage newBurningStorage() {
+        return new SimpleBurningStorage() {
+            @Override
+            protected void onFinalCommit() {
+                // do nothing
+            }
+        };
+    }
+
+    private static final BurningStorage newBurningStorage(IntUnaryOperator op) {
+        return new SimpleBurningStorage(op) {
+            @Override
+            protected void onFinalCommit() {
+                // do nothing
+            }
+        };
     }
 }
