@@ -27,7 +27,7 @@ import niv.burning.impl.BurningImpl;
 public interface BurningPropagator {
 
     /**
-     * Sided block access to burning propagator instances.
+     * Sided block access to burning propagators.
      * <p>
      * The {@code Direction} parameter may be null, meaning that a full instance
      * (ignoring side restrictions) should be queried. Refer to

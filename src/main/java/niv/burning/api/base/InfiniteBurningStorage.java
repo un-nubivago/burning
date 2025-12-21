@@ -6,15 +6,16 @@ import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
 
 /**
- * A singleton {@link BurningStorage} that always allows extraction of the maximum burning value,
- * ignores insertion, and always reports {@link Burning#MAX_VALUE} as contained.
+ * Provides a burning storage with an infinite reserve of "burning". Doesn't support insertion.
+ * <p>
+ * Useful for creative storages implementations.
  */
-public final class InfiniteBurningStorage implements BurningStorage {
+public class InfiniteBurningStorage implements BurningStorage {
 
+    /**
+     * Singleton and stateless instance.
+     */
     public static final InfiniteBurningStorage INSTANCE = new InfiniteBurningStorage();
-
-    private InfiniteBurningStorage() {
-    }
 
     @Override
     public boolean supportsInsertion() {
