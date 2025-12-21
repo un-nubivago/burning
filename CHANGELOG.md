@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
++ Added `BurningPropagator` block API.
+
 ## [1.1][1.1+1.21.6] - 2025-08-17
 
 ### Changed
