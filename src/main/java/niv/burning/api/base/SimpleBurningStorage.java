@@ -1,7 +1,5 @@
 package niv.burning.api.base;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.function.IntUnaryOperator;
 
 import com.mojang.serialization.Codec;
@@ -14,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
-import niv.burning.api.BurningStorageListener;
 
 /**
  * A basic {@link BurningStorage} implementation that tracks burning state and
@@ -22,7 +19,7 @@ import niv.burning.api.BurningStorageListener;
  * Can be used for simple block entities or as a utility for custom burning
  * logic.
  */
-public class SimpleBurningStorage
+public abstract class SimpleBurningStorage
         extends SnapshotParticipant<SimpleBurningStorage.Snapshot>
         implements BurningStorage {
 
@@ -43,8 +40,6 @@ public class SimpleBurningStorage
     protected int maxBurning;
 
     protected Burning zero;
-
-    private Collection<BurningStorageListener> listeners;
 
     public SimpleBurningStorage() {
         this(null);
@@ -76,23 +71,6 @@ public class SimpleBurningStorage
         }
     }
 
-    public void addListener(BurningStorageListener burningStorageListener) {
-        if (this.listeners == null)
-            this.listeners = new ArrayList<>();
-        this.listeners.add(burningStorageListener);
-    }
-
-    public void removeListener(BurningStorageListener burningStorageListener) {
-        if (this.listeners != null)
-            this.listeners.remove(burningStorageListener);
-    }
-
-	protected void setChanged() {
-        if (this.listeners != null)
-            for (var burningStorageListener : this.listeners)
-                burningStorageListener.burningStorageChanged(this);
-    }
-
     // From {@link SnapshotParticipant}
 
     @Override
@@ -108,9 +86,7 @@ public class SimpleBurningStorage
     }
 
     @Override
-    protected void onFinalCommit() {
-        this.setChanged();
-    }
+    protected abstract void onFinalCommit();
 
     // From {@link BurningStorage}
 
