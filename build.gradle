@@ -109,7 +109,7 @@ modrinth {
     projectId = "${project.project_id}"
     versionName = "Burning ${project.mod_version}"
     changelog = "sh CHANGELOG.sh".execute().text
-    versionType = "release"
+    versionType = "beta"
     gameVersions = Arrays.asList("${project.game_versions}".toString().split(","))
     uploadFile = remapJar
     additionalFiles = ["build/libs/burning-${project.mod_version}-sources.jar"]
@@ -117,5 +117,5 @@ modrinth {
     dependencies {
         required.project "fabric-api"
     }
-    // debugMode = true
+    debugMode = true
 }
