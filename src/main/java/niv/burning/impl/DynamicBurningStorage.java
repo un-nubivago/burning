@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
-import niv.burning.api.BurningStorageUtil;
+import niv.burning.api.base.BurningStorageBlockEntity;
 
 @Internal
 public class DynamicBurningStorage
@@ -104,7 +104,7 @@ public class DynamicBurningStorage
 
     @Override
     protected void onFinalCommit() {
-        BurningStorageUtil.tryUpdateLitProperty(this.target, this);
+        BurningStorageBlockEntity.tryUpdateLitProperty(this.target, this);
         this.target.setChanged();
     }
 }

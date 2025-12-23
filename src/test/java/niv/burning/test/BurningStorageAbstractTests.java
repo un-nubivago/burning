@@ -1,5 +1,6 @@
 package niv.burning.test;
 
+import static niv.burning.api.BurningStorage.transfer;
 import static niv.burning.impl.BurningContexts.DEFAULT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -14,9 +15,9 @@ import net.minecraft.server.Bootstrap;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import niv.burning.api.Burning;
-import niv.burning.api.BurningStorageUtil;
 import niv.burning.api.base.SimpleBurningStorage;
 import niv.burning.api.base.SimpleBurningStorage.Snapshot;
+import niv.burning.impl.BurningImpl;
 import niv.burning.impl.TestAbstractBurningStorage;
 
 class BurningStorageAbstractTests {
@@ -30,6 +31,7 @@ class BurningStorageAbstractTests {
     static void setup() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
+        BurningImpl.initialize();
 
         coal16 = Burning.COAL.one();
         coal12 = Burning.COAL.withValue(1200, DEFAULT);
@@ -114,13 +116,13 @@ class BurningStorageAbstractTests {
         assertEquals(coal8, target.getBurning(DEFAULT));
 
         try (var transaction = Transaction.openOuter()) {
-            assertEquals(coal4, BurningStorageUtil.transfer(source, target, coal4, DEFAULT, transaction));
+            assertEquals(coal4, transfer(source, target, coal4, DEFAULT, transaction));
         }
         assertEquals(coal8, source.getBurning(DEFAULT));
         assertEquals(coal8, target.getBurning(DEFAULT));
 
         try (var transaction = Transaction.openOuter()) {
-            assertEquals(coal4, BurningStorageUtil.transfer(source, target, coal4, DEFAULT, transaction));
+            assertEquals(coal4, transfer(source, target, coal4, DEFAULT, transaction));
             transaction.commit();
         }
         assertEquals(coal4, source.getBurning(DEFAULT));
@@ -145,13 +147,13 @@ class BurningStorageAbstractTests {
         assertEquals(coal12, target.getBurning(DEFAULT));
 
         try (var transaction = Transaction.openOuter()) {
-            assertEquals(coal4, BurningStorageUtil.transfer(source, target, coal12, DEFAULT, transaction));
+            assertEquals(coal4, transfer(source, target, coal12, DEFAULT, transaction));
         }
         assertEquals(coal8, source.getBurning(DEFAULT));
         assertEquals(coal12, target.getBurning(DEFAULT));
 
         try (var transaction = Transaction.openOuter()) {
-            assertEquals(coal4, BurningStorageUtil.transfer(source, target, coal12, DEFAULT, transaction));
+            assertEquals(coal4, transfer(source, target, coal12, DEFAULT, transaction));
             transaction.commit();
         }
         assertEquals(coal4, source.getBurning(DEFAULT));
