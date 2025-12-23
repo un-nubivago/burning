@@ -1,6 +1,4 @@
-package niv.burning.impl;
-
-import org.jetbrains.annotations.ApiStatus.Internal;
+package niv.burning.api.base;
 
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
@@ -11,28 +9,37 @@ import net.minecraft.world.level.block.entity.FuelValues;
 import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
-import niv.burning.api.base.BurningStorageBlockEntity;
-import niv.burning.api.base.SimpleBurningStorage;
 import niv.burning.api.base.SimpleBurningStorage.Snapshot;
 
-@Internal
-public class AbstractFurnaceBurningStorage
+/**
+ * Provides a burning storage implementation suited for block entities extending
+ * vanilla's AbstractFurnaceBlockEntity and, thus, that already have an internal
+ * fuel burning logic.
+ * <p>
+ * Note: When queried for burning storages, block entities extending
+ * AbstractFurnaceBlockEntity return instances of this class unless registered
+ * otherwise.
+ *
+ * @see {@link BurningStorageBlockEntity}
+ * @since 2.0
+ */
+public class FurnaceBurningStorage
         extends SnapshotParticipant<SimpleBurningStorage.Snapshot>
         implements BurningStorage {
 
     private final AbstractFurnaceBlockEntity target;
 
-    public AbstractFurnaceBurningStorage(AbstractFurnaceBlockEntity target) {
+    public FurnaceBurningStorage(AbstractFurnaceBlockEntity target) {
         this.target = target;
     }
 
     private Burning getZero() {
-        var fuel = this.target.burning_getFuel();
+        var fuel = this.target.getInternalBurningFuel();
         return fuel == null ? Burning.MIN_VALUE : Burning.ofZero(fuel);
     }
 
     private void setZero(Burning zero) {
-        this.target.burning_setFuel(zero.getFuel());
+        this.target.setInternalBurningFuel(zero.getFuel());
     }
 
     @Override
