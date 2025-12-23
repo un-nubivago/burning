@@ -6,19 +6,21 @@
 
 + Burning storages of block entities extending `AbstractFurnaceBlockEntity` are now insertion-only, the same goes for dynamically registered ones.
 + Changed `EmptyBurningStorage` from class to anonymous singleton `EMPTY` field within `BurningStorage` interface.
-+ Moved function `transfer` from `BurningStorage` to `BurningStorageUtil`.
-+ Renamed `BurningStorageHelper` to `BurningStorageUtil`.
++ Moved `tryUpdateLitProperty` method from `BurningStorageHelper` to the newly added `BurningStorageBlockEntity` interface.
 + Renamed `ForwardingBurningStorage` to `DelegatingBurningStorage` to mirror other APIs naming schemas.
 
 ### Added
 
 + Added `BurningPropagator` block API.
++ Added `BurningStorageBlockEntity` interface for automatic registration of burning storages.
++ Added `FurnaceBurningStorage` implementation for vanilla-like Furnace-equivalent block entities.
 + Added static constructor in `SimpleBurningContext` for fuel mappings equal to the legacy (pre Minecraft 1.21.2) ones.
-+ Added static constructors for `BurningContext`.
++ Added static constructors for `BurningContext` class.
 
 ### Removed
 
-+ Removed `BurningStorageListener` for a more streamlined interface.
++ Removed `BurningStorageHelper` class.
++ Removed `BurningStorageListener` class for a more streamlined interface.
 
 ## [1.1][1.1+1.21.6] - 2025-08-17
 
