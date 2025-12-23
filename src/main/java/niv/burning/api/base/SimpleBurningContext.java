@@ -18,9 +18,11 @@ import niv.burning.api.BurningContext;
 
 /**
  * Provides a simple and immutable burning context backed by an
- * {@link Object2IntMap} between items and burn times (ticks).
+ * {@link Object2IntMap} between items and burn times.
  * <p>
  * Items not mapped have 0 burn time and are not fuel.
+ *
+ * @since 1.0
  */
 public class SimpleBurningContext implements BurningContext {
 

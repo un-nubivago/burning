@@ -9,6 +9,8 @@ import niv.burning.api.BurningStorage;
  * Provides a burning storage with an infinite reserve of "burning". Doesn't support insertion.
  * <p>
  * Useful for creative storages implementations.
+ *
+ * @since 1.0
  */
 public class InfiniteBurningStorage implements BurningStorage {
 

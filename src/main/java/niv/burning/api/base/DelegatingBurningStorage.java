@@ -12,7 +12,7 @@ import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
 
 /**
- * Provides a burning storage that dele that forwards every operation to another
+ * Provides a burning storage that forwards every operation to another
  * burning storage, with an optional boolean supplier to check that the backing
  * storage is still valid.
  * <p>
