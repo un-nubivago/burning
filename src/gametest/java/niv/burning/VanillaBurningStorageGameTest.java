@@ -18,7 +18,6 @@ import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
 
-@SuppressWarnings("java:S2187")
 public class VanillaBurningStorageGameTest {
 
     private static final MutableComponent SHOULD_BE_BURNING = literal("BurningStorage should be burning");
