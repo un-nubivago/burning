@@ -17,7 +17,7 @@ class FuelValuesMixin implements BurningContext {
         return ((FuelValues) (Object) this).isFuel(new ItemStack(item));
     }
 
-    @Unique
+    @Unique(silent = true)
     @Override
     public boolean isFuel(ItemStack itemStack) {
         return ((FuelValues) (Object) this).isFuel(itemStack);
@@ -29,7 +29,7 @@ class FuelValuesMixin implements BurningContext {
         return ((FuelValues) (Object) this).burnDuration(new ItemStack(item));
     }
 
-    @Unique
+    @Unique(silent = true)
     @Override
     public int burnDuration(ItemStack itemStack) {
         return ((FuelValues) (Object) this).burnDuration(itemStack);
