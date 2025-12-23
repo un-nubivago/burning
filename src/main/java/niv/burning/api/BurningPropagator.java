@@ -3,7 +3,7 @@ package niv.burning.api;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import niv.burning.impl.BurningImpl;
 
 /**
  * Provides a common interfaces for blocks able to propagate the "burning"
@@ -36,7 +35,7 @@ public interface BurningPropagator {
      * Blocks implementing this interface are automatically registered.
      */
     BlockApiLookup<BurningPropagator, @Nullable Direction> SIDED = BlockApiLookup.get(
-            ResourceLocation.tryBuild(BurningImpl.MOD_ID, "burning_propagator"),
+            ResourceLocation.tryParse("burning:sided_propagator"),
             BurningPropagator.class, Direction.class);
 
     /**
@@ -52,53 +51,54 @@ public interface BurningPropagator {
     Set<Direction> evalPropagationTargets(Level level, BlockPos blockPos);
 
     /**
-     * Finds all burning storages the block at position
-     * <code>startingBlockPos</code> can propagate to through burning propagators
-     * blocks.
+     * Finds all burning storages the block at position {@code start} can propagate
+     * to through burning propagators blocks, and calls {@code shallReturn} for each
+     * of those storages and their respective positions.
      * <p>
-     * Uses a breath-first search algorithm to search the propagators graph and
-     * searches up to 64 blocks on every path.
+     * Returns early if/when {@code shallReturn} returns {@code true}.
      * <p>
-     * For each new discovered block besides the first, remembers the direction of
-     * the previous block and uses its opposite as a parameter for sided access.
+     * The order at which burning storages are found isn't guaranteed.
      *
-     * @param level            the level the starting block is in and in which the
-     *                         search happens
-     * @param startingBlockPos the position the starting block is at
-     * @param callback         a bi-consumer called whenever a burning storage is
-     *                         found. It consume the position at which it is found
-     *                         and the burning storage itself
+     * @param level       the level the starting block is in and in which the
+     *                    search happens
+     * @param start       the position the starting block is at
+     * @param shallReturn a non-null bi-predicate, used for callback and cancelling
      */
-    static void searchBurningStorages(Level level, BlockPos startingBlockPos,
-            BiConsumer<BlockPos, BurningStorage> callback) {
-        var queue = new LinkedList<Triple<Direction, BlockPos, Integer>>();
-        var visited = new HashSet<BlockPos>();
-        for (var pair = Triple.of((Direction) null, startingBlockPos, 64); pair != null; pair = queue.pollFirst()) {
-            var from = pair.getLeft();
-            var pos = pair.getMiddle();
-            var hops = pair.getRight() - 1;
+    static void searchBurningStorages(Level level, BlockPos start,
+            BiPredicate<BlockPos, BurningStorage> shallReturn) {
+        var open = new LinkedList<Triple<Direction, BlockPos, Integer>>();
+        var closed = HashSet.newHashSet(64);
+        closed.add(start);
+        for (var elem = Triple.of((Direction) null, start, 64); elem != null; elem = open.poll()) {
+            var from = elem.getLeft();
+            var pos = elem.getMiddle();
+
+            var storage = BurningStorage.SIDED.find(level, pos, from);
+            if (storage != null && shallReturn.test(pos, storage))
+                return;
 
             BurningPropagator propagator = null;
+            var hops = elem.getRight() - 1;
 
             if (hops > 0)
                 propagator = BurningPropagator.SIDED.find(level, pos, from);
 
             if (propagator == null)
-                propagator = (a, b) -> Set.of();
+                continue;
 
-            for (var direction : propagator.evalPropagationTargets(level, pos)) {
-                var relative = pos.relative(direction);
-                if (visited.contains(relative))
-                    break;
-                queue.add(Triple.of(direction.getOpposite(), relative, hops));
+            var dirs = propagator.evalPropagationTargets(level, pos).toArray(Direction[]::new);
+            for (int i = dirs.length - 1; i > 0; i--) {
+                int j = level.random.nextInt(i + 1);
+                var d = dirs[j];
+                dirs[j] = dirs[i];
+                dirs[i] = d;
             }
 
-            var storage = BurningStorage.SIDED.find(level, pos, from);
-
-            if (storage != null)
-                callback.accept(pos, storage);
-
-            visited.add(pos);
+            for (var dir : dirs) {
+                var relative = pos.relative(dir);
+                if (closed.add(relative))
+                    open.add(Triple.of(dir.getOpposite(), relative, hops));
+            }
         }
     }
 }
