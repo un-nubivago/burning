@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.0] - 2025-12-24
+
 ### Changed
 
 + Burning storages of block entities extending `AbstractFurnaceBlockEntity` are now insertion-only, the same goes for dynamically registered ones.
@@ -79,6 +81,7 @@
 
 Alpha release.
 
+[2.0]: https://github.com/NivOridocs/burning/releases/tag/2.0
 [1.1+1.21.6]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21.4
 [1.0+1.21.4]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21.4
 [1.0+1.21.2]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21.2
