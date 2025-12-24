@@ -8,9 +8,9 @@
         ]
     },
     "depends": {
-        "fabricloader": ">=0.18.3",
-		"minecraft": "~1.21.6",
-        "java": ">=21",
+        "fabricloader": "*",
+		"minecraft": "*",
+        "java": "*",
         "fabric-api": "*",
         "burning": "*"
     }
