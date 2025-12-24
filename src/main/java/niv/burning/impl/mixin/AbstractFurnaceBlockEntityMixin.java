@@ -11,10 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.BurningStorage;
 import niv.burning.api.BurningTags;
 import niv.burning.api.base.FurnaceBurningStorage;
@@ -51,9 +51,7 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
 
     @Override
     public @Nullable BurningStorage getBurningStorage(@Nullable Direction direction) {
-        if (BuiltInRegistries.BLOCK_ENTITY_TYPE
-                .wrapAsHolder(((AbstractFurnaceBlockEntity) (Object) this).getType())
-                .is(BurningTags.BLACKLIST)) {
+        if (((BlockEntity) (Object) this).getBlockState().is(BurningTags.BLACKLIST)) {
             return null;
         } else {
             return this.internalBurningStorage;
