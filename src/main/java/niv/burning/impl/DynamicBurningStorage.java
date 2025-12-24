@@ -1,18 +1,21 @@
 package niv.burning.impl;
 
+import org.jetbrains.annotations.ApiStatus.Internal;
+
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
-import niv.burning.api.BurningStorageHelper;
+import niv.burning.api.base.BurningStorageBlockEntity;
 
-class DynamicBurningStorage
+@Internal
+public class DynamicBurningStorage
         extends SnapshotParticipant<DynamicBurningStorage.Snapshot>
         implements BurningStorage {
 
-    static final record Snapshot(double burning, double maxBurning, Burning zero) {
+    public static final record Snapshot(double burning, double maxBurning, Burning zero) {
     }
 
     private final DynamicBurningStorageProvider provider;
@@ -64,18 +67,13 @@ class DynamicBurningStorage
     }
 
     @Override
+    public boolean supportsExtraction() {
+        return false;
+    }
+
+    @Override
     public Burning extract(Burning burning, BurningContext context, TransactionContext transaction) {
-        double currentBurning = burning();
-        int fuelTime = burning.getBurnDuration(context);
-        double value = Math.min(currentBurning, burning.getValue(context));
-        updateSnapshots(transaction);
-        currentBurning -= value;
-        burning(currentBurning);
-        if (maxBurning() > fuelTime && currentBurning <= fuelTime) {
-            maxBurning(fuelTime);
-            this.zero = burning.zero();
-        }
-        return burning.withValue((int) value, context);
+        return burning.zero();
     }
 
     @Override
@@ -106,7 +104,7 @@ class DynamicBurningStorage
 
     @Override
     protected void onFinalCommit() {
-        BurningStorageHelper.tryUpdateLitProperty(this.target, this);
+        BurningStorageBlockEntity.tryUpdateLitProperty(this.target, this);
         this.target.setChanged();
     }
 }

@@ -1,17 +1,18 @@
 package niv.burning.api;
 
+import org.jetbrains.annotations.ApiStatus.Internal;
+
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-import niv.burning.impl.BurningContextFactory;
+import niv.burning.api.base.SimpleBurningContext;
 
 /**
- * Represents a context for determining fuel status and burn duration for items
- * and item stacks.
- * <p>
- * Implementations define what counts as fuel and how long it burns.
- * </p>
+ * Provides a wrapper interfaces for different ways to determine whether an item
+ * is fuel and to query its burn duration.
+ *
+ * @since 1.0
  */
 public interface BurningContext {
 
@@ -55,38 +56,65 @@ public interface BurningContext {
     int burnDuration(ItemStack itemStack);
 
     /**
-     * Returns a singleton BurningContext instance with default item-to-fuel-value
-     * mappings.
+     * Returns a default burning context.
      * <p>
-     * Prior to Minecraft 1.21.2, this implementation forwards to
+     * Prior to Minecraft 1.21.2, returns a wrapper around
      * {@link AbstractFurnaceBlockEntity#isFuel(ItemStack)} method and
      * {@link AbstractFurnaceBlockEntity#getFuel()} map.
-     * </p>
      * <p>
-     * Since Minecraft 1.21.2, this implementation embeds a map identical to the now
-     * defunct {@link AbstractFurnaceBlockEntity#getFuel()} and queries it.
-     * </p>
-     * @deprecated Prefer {@link #worldlyContext(Level)} to respect newer versions'
-     *             dynamic/world-specific fuel values.
-     * @return the default legacy-based BurningContext
+     * Since Minecraft 1.21.2, returns a vanilla context, that is, a context with
+     * only the fuels present in the most vanilla configuration.
+     * <p>
+     *
+     * @return a default burning context
+     * @see {@link SimpleBurningContext#legacyInstance()} for a prior to Minecraft
+     *      1.21.2 fuel map
+     * @since 2.0
+     * @deprecated As of Burning 2.0, prefer {@link #worldlyContext(Level)}
      */
     @SuppressWarnings("java:S1133")
-    @Deprecated(since = "", forRemoval = false)
+    @Deprecated(since = "2.0", forRemoval = false)
     static BurningContext defaultContext() {
-        return BurningContextFactory.defaultContext();
+        return DEFAULT;
     }
 
     /**
-     * Returns a new or existing BurningContext bound to the provided {@link Level}
-     * that queries its fuel values.
+     * Returns the burning context bound to the provided {@link Level#fuelValues()
+     * level} parameter.
      * <p>
      * Prior to Minecraft 1.21.2, this returns the same as
      * {@link #defaultContext()}.
-     * </p>
+     *
      * @param level must not be null
-     * @return a level-scoped BurningContext that uses the world's fuel rules
+     * @since 2.0
+     * @return a burning context that uses the level's fuel values
      */
+    @SuppressWarnings("java:S1172")
     static BurningContext worldlyContext(Level level) {
-        return BurningContextFactory.worldlyContext(level);
+        return DEFAULT;
     }
+
+    @Internal
+    static BurningContext DEFAULT = new BurningContext() {
+
+        @Override
+        public boolean isFuel(Item item) {
+            return AbstractFurnaceBlockEntity.isFuel(new ItemStack(item));
+        }
+
+        @Override
+        public boolean isFuel(ItemStack itemStack) {
+            return AbstractFurnaceBlockEntity.isFuel(itemStack);
+        }
+
+        @Override
+        public int burnDuration(Item item) {
+            return AbstractFurnaceBlockEntity.getFuel().getOrDefault(item, 0);
+        }
+
+        @Override
+        public int burnDuration(ItemStack itemStack) {
+            return itemStack.isEmpty() ? 0 : AbstractFurnaceBlockEntity.getFuel().getOrDefault(itemStack.getItem(), 0);
+        }
+    };
 }
