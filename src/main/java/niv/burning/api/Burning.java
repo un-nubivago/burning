@@ -10,39 +10,33 @@ import org.jetbrains.annotations.Nullable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
 /**
- * An immutable object representing a percentage of a burning fuel.
- *
+ * Cornerstone class of this library.
  * <p>
- * To create a simple instance:
+ * Provides an immutable representation of a burning fuel at a certain
+ * percentage of consumption against that fuel's burn duration.
+ * <p>
+ * Used to represent how much of the given fuel burn duration has been consumed
+ * thus far and as a unit of transfer across different burning storages.
  *
- * <pre>
- * BurningContext context = BurningContext.defaultInstance();
- * Burning.of(Items.COAL, context).withValue(800, context);
- * </pre>
- * </p>
+ * @see {@link BurningContext}
+ * @see {@link BurningStorage}
+ * @since 1.0
  */
 public final class Burning {
 
     /**
-     * Codec for serializing and deserializing {@link Burning} instances.
+     * Codec to encode/decode instances.
      */
     public static final Codec<Burning> CODEC;
 
     /**
-     * Codec for serializing and deserializing zeroed {@link Burning} instances.
-     * <p>
-     * This codec maps item registry entries to {@code Burning} objects with percent zero,
-     * via the {@link Burning#ofZero(Item)} factory method.
-     * </p>
+     * Codec to encode/decode zeroed instances to/from {@link Item items}.
      */
     public static final Codec<Burning> ZERO_CODEC;
 
@@ -51,6 +45,7 @@ public final class Burning {
 
     /**
      * A zeroed instance with {@link Items#LAVA_BUCKET} as fuel.
+     * <p>
      * Used as a default or fallback value.
      */
     public static final Burning LAVA_BUCKET;
@@ -66,12 +61,13 @@ public final class Burning {
     public static final Burning COAL;
 
     /**
-     * The minimum value for burning, equivalent to {@link #LAVA_BUCKET} zeroed.
+     * The minimum value for burning, equivalent to {@link #LAVA_BUCKET}.
      */
     public static final Burning MIN_VALUE;
 
     /**
-     * The maximum value for burning, equivalent to <code>Burning.MIN_VALUE.one()</code>.
+     * The maximum value for burning, equivalent to
+     * <code>Burning.MIN_VALUE.one()</code>.
      */
     public static final Burning MAX_VALUE;
 
@@ -192,7 +188,8 @@ public final class Burning {
      * </p>
      *
      * <p>
-     * If {@code value} equals or exceeds this fuel's burn duration, this method is identical
+     * If {@code value} equals or exceeds this fuel's burn duration, this method is
+     * identical
      * to {@link #one()}.
      * </p>
      *
@@ -217,7 +214,8 @@ public final class Burning {
      *
      * @param fuel    a new fuel item
      * @param context the {@link BurningContext} to use for lookup
-     * @return a non-null instance with the new fuel and equivalent value, or this instance if not possible
+     * @return a non-null instance with the new fuel and equivalent value, or this
+     *         instance if not possible
      */
     public Burning withFuel(Item fuel, BurningContext context) {
         double max;
@@ -263,12 +261,14 @@ public final class Burning {
     }
 
     /**
-     * Returns a zeroed instance with the provided item as fuel if it is a valid fuel
+     * Returns a zeroed instance with the provided item as fuel if it is a valid
+     * fuel
      * according to the provided context, or {@code null} otherwise.
      *
      * @param fuel    an item which should be a fuel
      * @param context the {@link BurningContext} to use for lookup
-     * @return a zeroed instance if {@code fuel} is a valid fuel, {@code null} otherwise
+     * @return a zeroed instance if {@code fuel} is a valid fuel, {@code null}
+     *         otherwise
      */
     public static final @Nullable Burning of(Item fuel, BurningContext context) {
         return context.isFuel(fuel)
@@ -277,25 +277,30 @@ public final class Burning {
     }
 
     /**
-     * Wraps the result of {@link #of(Item, BurningContext)} into an {@link Optional}.
+     * Wraps the result of {@link #of(Item, BurningContext)} into an
+     * {@link Optional}.
      *
      * @param fuel    an item which should be a fuel
      * @param context the {@link BurningContext} to use for lookup
-     * @return an {@link Optional} containing a zeroed instance if {@code fuel} is a valid fuel, or empty otherwise
+     * @return an {@link Optional} containing a zeroed instance if {@code fuel} is a
+     *         valid fuel, or empty otherwise
      */
     public static final Optional<Burning> ofOptional(Item fuel, BurningContext context) {
         return Optional.ofNullable(of(fuel, context));
     }
 
     /**
-     * Returns a zeroed {@link Burning} instance for the specified fuel item (i.e., percent = 0).
+     * Returns a zeroed {@link Burning} instance for the specified fuel item (i.e.,
+     * percent = 0).
      *
      * <p>
-     * Unlike {@link #of(Item, BurningContext)}, this method does not validate that the item is a valid fuel; it always returns an instance.
+     * Unlike {@link #of(Item, BurningContext)}, this method does not validate that
+     * the item is a valid fuel; it always returns an instance.
      * </p>
      *
      * @param fuel an item to use as the fuel
-     * @return a {@link Burning} instance with the percent set to zero for the given fuel
+     * @return a {@link Burning} instance with the percent set to zero for the given
+     *         fuel
      */
     public static final Burning ofZero(Item fuel) {
         return ZEROS.computeIfAbsent(fuel, item -> new Burning(0, item));
@@ -306,13 +311,15 @@ public final class Burning {
      *
      * <p>
      * The result can have a's fuel, b's fuel, or {@link #MIN_VALUE}'s fuel,
-     * whichever is the smallest among those greater than or equal to the sum of a and b's values.
+     * whichever is the smallest among those greater than or equal to the sum of a
+     * and b's values.
      * </p>
      *
      * @param a       must not be null
      * @param b       must not be null
      * @param context the {@link BurningContext} to use for lookup
-     * @return a {@link Burning} instance representing the sum, or {@link #MAX_VALUE}, whichever is lower
+     * @return a {@link Burning} instance representing the sum, or
+     *         {@link #MAX_VALUE}, whichever is lower
      */
     public static final Burning add(Burning a, Burning b, BurningContext context) {
         var value = a.getValue(context) + b.getValue(context);
@@ -346,6 +353,7 @@ public final class Burning {
      *
      * <p>
      * Equivalent to:
+     *
      * <pre>
      * Double.compare(a == null ? 0d : a.getValue(context), b == null ? 0d : b.getValue(context))
      * </pre>
@@ -353,7 +361,8 @@ public final class Burning {
      * @param a       may be null
      * @param b       may be null
      * @param context the {@link BurningContext} to use for lookup
-     * @return 0 if a's value is equal to b's value; a value less than 0 if a's value is less; a value greater than 0 if a's value is greater
+     * @return 0 if a's value is equal to b's value; a value less than 0 if a's
+     *         value is less; a value greater than 0 if a's value is greater
      */
     public static final int compareValue(Burning a, Burning b, BurningContext context) {
         if (a == b) {
@@ -399,13 +408,5 @@ public final class Burning {
         } else {
             return Burning.MIN_VALUE.withValue((int) value, context);
         }
-    }
-
-    public Tag save(HolderLookup.Provider provider, Tag tag) {
-        return CODEC.encode(this, provider.createSerializationContext(NbtOps.INSTANCE), tag).getOrThrow();
-    }
-
-    public static Optional<Burning> parse(HolderLookup.Provider provider, Tag tag) {
-        return CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag).result();
     }
 }
