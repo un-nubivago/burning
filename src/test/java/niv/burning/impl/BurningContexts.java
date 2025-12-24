@@ -1,56 +1,77 @@
 package niv.burning.impl;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import niv.burning.api.BurningContext;
+import niv.burning.api.base.SimpleBurningContext;
 
 public class BurningContexts {
 
-    public static final BurningContext HALVED = new BurningContext() {
-        @Override
-        public boolean isFuel(Item item) {
-            return DefaultBurningContext.instance().isFuel(item);
-        }
+    public static final BurningContext DEFAULT;
 
-        @Override
-        public boolean isFuel(ItemStack itemStack) {
-            return DefaultBurningContext.instance().isFuel(itemStack);
-        }
+    public static final BurningContext HALVED;
 
-        @Override
-        public int burnDuration(Item item) {
-            return DefaultBurningContext.instance().burnDuration(item) / 2;
-        }
+    public static final BurningContext SQUARED;
 
-        @Override
-        public int burnDuration(ItemStack itemStack) {
-            return DefaultBurningContext.instance().burnDuration(itemStack) / 2;
-        }
-    };
+    static {
+        var map = new Object2IntOpenHashMap<Item>(64);
+        map.put(Items.LAVA_BUCKET, 20000);
+        map.put(Blocks.COAL_BLOCK.asItem(), 16000);
+        map.put(Items.BLAZE_ROD, 2400);
+        map.put(Items.COAL, 1600);
+        map.put(Items.CHARCOAL, 1600);
+        map.put(Blocks.BAMBOO_MOSAIC.asItem(), 300);
+        map.put(Blocks.BAMBOO_MOSAIC_STAIRS.asItem(), 300);
+        map.put(Blocks.BAMBOO_MOSAIC_SLAB.asItem(), 150);
+        map.put(Blocks.NOTE_BLOCK.asItem(), 300);
+        map.put(Blocks.BOOKSHELF.asItem(), 300);
+        map.put(Blocks.CHISELED_BOOKSHELF.asItem(), 300);
+        map.put(Blocks.LECTERN.asItem(), 300);
+        map.put(Blocks.JUKEBOX.asItem(), 300);
+        map.put(Blocks.CHEST.asItem(), 300);
+        map.put(Blocks.TRAPPED_CHEST.asItem(), 300);
+        map.put(Blocks.CRAFTING_TABLE.asItem(), 300);
+        map.put(Blocks.DAYLIGHT_DETECTOR.asItem(), 300);
+        map.put(Items.BOW, 300);
+        map.put(Items.FISHING_ROD, 300);
+        map.put(Blocks.LADDER.asItem(), 300);
+        map.put(Items.WOODEN_SHOVEL, 200);
+        map.put(Items.WOODEN_SWORD, 200);
+        map.put(Items.WOODEN_HOE, 200);
+        map.put(Items.WOODEN_AXE, 200);
+        map.put(Items.WOODEN_PICKAXE, 200);
+        map.put(Items.STICK, 100);
+        map.put(Items.BOWL, 100);
+        map.put(Blocks.DRIED_KELP_BLOCK.asItem(), 4001);
+        map.put(Items.CROSSBOW, 300);
+        map.put(Blocks.BAMBOO.asItem(), 50);
+        map.put(Blocks.DEAD_BUSH.asItem(), 100);
+        map.put(Blocks.SCAFFOLDING.asItem(), 50);
+        map.put(Blocks.LOOM.asItem(), 300);
+        map.put(Blocks.BARREL.asItem(), 300);
+        map.put(Blocks.CARTOGRAPHY_TABLE.asItem(), 300);
+        map.put(Blocks.FLETCHING_TABLE.asItem(), 300);
+        map.put(Blocks.SMITHING_TABLE.asItem(), 300);
+        map.put(Blocks.COMPOSTER.asItem(), 300);
+        map.put(Blocks.AZALEA.asItem(), 100);
+        map.put(Blocks.FLOWERING_AZALEA.asItem(), 100);
+        map.put(Blocks.MANGROVE_ROOTS.asItem(), 300);
 
-    public static final BurningContext SQUARED = new BurningContext() {
-        @Override
-        public boolean isFuel(Item item) {
-            return DefaultBurningContext.instance().isFuel(item);
-        }
+        DEFAULT = new SimpleBurningContext(map);
 
-        @Override
-        public boolean isFuel(ItemStack itemStack) {
-            return DefaultBurningContext.instance().isFuel(itemStack);
-        }
+        var halved = new Object2IntOpenHashMap<Item>(map.size());
+        var squared = new Object2IntOpenHashMap<Item>(map.size());
 
-        @Override
-        public int burnDuration(Item item) {
-            return square(DefaultBurningContext.instance().burnDuration(item));
-        }
+        map.forEach((item, value) -> {
+            if (item != null && value > 0) {
+                halved.put(item, value / 2);
+                squared.put(item, value * value);
+            }
+        });
 
-        @Override
-        public int burnDuration(ItemStack itemStack) {
-            return square(DefaultBurningContext.instance().burnDuration(itemStack));
-        }
-    };
-
-    private static final int square(int i) {
-        return i * i;
+        HALVED = new SimpleBurningContext(halved);
+        SQUARED = new SimpleBurningContext(squared);
     }
 }

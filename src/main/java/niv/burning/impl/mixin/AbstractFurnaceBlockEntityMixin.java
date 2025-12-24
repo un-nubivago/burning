@@ -1,5 +1,6 @@
 package niv.burning.impl.mixin;
 
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,12 +10,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.sugar.Local;
 
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import niv.burning.api.BurningStorage;
+import niv.burning.api.BurningTags;
+import niv.burning.api.base.FurnaceBurningStorage;
 import niv.burning.impl.AbstractFurnaceBlockEntityExtension;
-import niv.burning.impl.AbstractFurnaceBurningStorage;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExtension {
@@ -27,27 +31,33 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
     private static final String SERVER_LEVEL = "Lnet/minecraft/server/level/ServerLevel;";
 
     @Unique
-    @SuppressWarnings("java:S116")
-    private final BurningStorage burning_burningStorage = new AbstractFurnaceBurningStorage(
+    private final BurningStorage internalBurningStorage = new FurnaceBurningStorage(
             (AbstractFurnaceBlockEntity) (Object) this);
 
     @Unique
-    @SuppressWarnings("java:S116")
-    private Item burning_lastBurnedFuel;
+    private Item internalLastBurnedFuel;
 
+    @Unique
     @Override
-    public Item burning_getFuel() {
-        return this.burning_lastBurnedFuel;
+    public Item getInternalBurningFuel() {
+        return this.internalLastBurnedFuel;
+    }
+
+    @Unique
+    @Override
+    public void setInternalBurningFuel(Item fuel) {
+        this.internalLastBurnedFuel = fuel;
     }
 
     @Override
-    public void burning_setFuel(Item fuel) {
-        this.burning_lastBurnedFuel = fuel;
-    }
-
-    @Override
-    public BurningStorage burning_getBurningStorage() {
-        return burning_burningStorage;
+    public @Nullable BurningStorage getBurningStorage(@Nullable Direction direction) {
+        if (BuiltInRegistries.BLOCK_ENTITY_TYPE
+                .wrapAsHolder(((AbstractFurnaceBlockEntity) (Object) this).getType())
+                .is(BurningTags.BLACKLIST)) {
+            return null;
+        } else {
+            return this.internalBurningStorage;
+        }
     }
 
     @Inject( //
@@ -57,6 +67,6 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
     private static void injectAfterGetBurnDuration(CallbackInfo info,
             @Local AbstractFurnaceBlockEntity entity,
             @Local(ordinal = 0) ItemStack itemStack) {
-        entity.burning_setFuel(itemStack.getItem());
+        entity.setInternalBurningFuel(itemStack.getItem());
     }
 }

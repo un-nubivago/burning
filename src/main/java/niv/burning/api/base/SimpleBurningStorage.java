@@ -1,8 +1,8 @@
 package niv.burning.api.base;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.function.IntUnaryOperator;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,18 +11,55 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
-import niv.burning.api.BurningStorageListener;
 
 /**
- * A basic {@link BurningStorage} implementation that tracks burning state and
- * supports snapshotting.
- * Can be used for simple block entities or as a utility for custom burning
- * logic.
+ * Provides a simple burning storage implementation that supports insertion and
+ * extraction, enable snapshotting, and has easy load and save methods.
+ * <p>
+ * Example usage:
+ *
+ * <pre>
+ * public class MyBlockEntity extends BlockEntity {
+ *   // Add a SimpleBurningStorage in the block entity class
+ *   public final SimpleBurningStorage burningStorage = new SimpleBurningStorage() {
+ *      {@literal @}Override
+ *      <p>
+ *      protected void onFinalCommit() {
+ *          setChanged();
+ *      }
+ *   };
+ *
+ *   // Use the storage internally, for example in tick()
+ *   public void tick() {
+ *     BurningContext context = BurningContext.worldlyContext(this.level);
+ *     if (!this.level.isClientSide && this.burningStorage.isBurning()) {
+ *       try (Transaction transaction = Transaction.openOuter()) {
+ *          Burning extracted = this.burningStorage.extract(Burning.COAL.withValue(200, context), context, transaction);
+ *          // do something with burning just extracted
+ *          transaction.commit();
+ *       }
+ *     }
+ *   }
+ *
+ *   // Don't forget to save/read the energy in the block entity NBT.
+ *
+ * }
+ *
+ * // Don't forget to register the burning storage. Make sure to call this after you create the block entity type.
+ * BlockEntityType<MyBlockEntity> MY_BLOCK_ENTITY;
+ * BurningStorage.SIDED.registerForBlockEntity((myBlockEntity, direction) -> myBlockEntity.burningStorage, MY_BLOCK_ENTITY);
+ *
+ * </pre>
+ * <p>
+ *
+ * @since 1.0
  */
-public class SimpleBurningStorage
+public abstract class SimpleBurningStorage
         extends SnapshotParticipant<SimpleBurningStorage.Snapshot>
         implements BurningStorage {
 
@@ -44,31 +81,64 @@ public class SimpleBurningStorage
 
     protected Burning zero;
 
-    private Collection<BurningStorageListener> listeners;
-
+    /**
+     * Class constructor.
+     */
     public SimpleBurningStorage() {
         this(null);
     }
 
-    public SimpleBurningStorage(IntUnaryOperator operator) {
+    /**
+     * Class constructor with custom burn duration operator.
+     *
+     * @param operator operator to apply to every obtained burn duration
+     */
+    public SimpleBurningStorage(@Nullable IntUnaryOperator operator) {
         this.operator = operator == null ? IntUnaryOperator.identity() : operator;
         this.currentBurning = 0;
         this.maxBurning = 0;
         this.zero = Burning.MIN_VALUE;
     }
 
+    /**
+     * Gets this storage remaining burning time.
+     *
+     * @return a non-negative integer
+     */
     public int getCurrentBurning() {
         return currentBurning;
     }
 
+    /**
+     * Sets this storage remaining burning time to <code>value</code>, to 0 if
+     * <code>value</code> is negative, or to the current maximum burning duration if
+     * <code>value</code> is greater than that.
+     *
+     * @param value the new remaining burning time, clamped to fit between 0 and the
+     *              current maximum burning duration
+     */
     public void setCurrentBurning(int value) {
         this.currentBurning = Math.clamp(value, 0, this.maxBurning);
     }
 
+    /**
+     * Gets the last-set maximum burning duration.
+     *
+     * @return a non-negative integer
+     */
     public int getMaxBurning() {
         return maxBurning;
     }
 
+    /**
+     * Sets a new maximum burning duration to <code>value</code>, or to 0 if
+     * <code>value</code> is negative.
+     * <p>input
+     * Also sets the current remaining burning time to the new maximum is the former
+     * is greater than the latter.
+     *
+     * @param value the new maximum
+     */
     public void setMaxBurning(int value) {
         this.maxBurning = Math.max(0, value);
         if (this.currentBurning > this.maxBurning) {
@@ -76,21 +146,24 @@ public class SimpleBurningStorage
         }
     }
 
-    public void addListener(BurningStorageListener burningStorageListener) {
-        if (this.listeners == null)
-            this.listeners = new ArrayList<>();
-        this.listeners.add(burningStorageListener);
+    /**
+     * Loads this burning storage internal status from <code>input</code> using the
+     * the tag name "BurningStorage".
+     *
+     * @param input
+     */
+    public void load(ValueInput input) {
+        input.read("BurningSnapshot", SNAPSHOT_CODEC).ifPresent(this::readSnapshot);
     }
 
-    public void removeListener(BurningStorageListener burningStorageListener) {
-        if (this.listeners != null)
-            this.listeners.remove(burningStorageListener);
-    }
-
-	protected void setChanged() {
-        if (this.listeners != null)
-            for (var burningStorageListener : this.listeners)
-                burningStorageListener.burningStorageChanged(this);
+    /**
+     * Saves this burning storage internal status to <code>output</code> using the
+     * the tag name "BurningStorage".
+     *
+     * @param output
+     */
+    public void save(ValueOutput output) {
+        output.store("BurningSnapshot", SNAPSHOT_CODEC, this.createSnapshot());
     }
 
     // From {@link SnapshotParticipant}
@@ -108,9 +181,7 @@ public class SimpleBurningStorage
     }
 
     @Override
-    protected void onFinalCommit() {
-        this.setChanged();
-    }
+    protected abstract void onFinalCommit();
 
     // From {@link BurningStorage}
 

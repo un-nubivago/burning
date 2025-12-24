@@ -10,11 +10,11 @@ Uses Fabric's Lookup and Transaction APIs.
 
 You may read the documentation or the source code to learn more.
 
-### Getting Started (for regular users)
+### Installation
 
 Install it as you'd with any other mod, and without further configuration, every block which entity extends the `AbstractFurnaceBlockEntity` (Mojang mappings' name) abstract class, be them the vanilla _Furnace_, _Blast Furnace_, or _Smoker_, or any third-party block, will get a `BurningStorage` automatically and thus will be ready to interop with every other mod using this library.
 
-### Blacklisting Blocks (for advanced users)
+### A furnace is breaking the game? Blacklist it
 
 You may not want some blocks extending `AbstractFurnaceBlockEntity` (Mojang mappings' name) to get a `BurningStorage`, whether because it doesn't work or because of your preference.
 
@@ -61,7 +61,7 @@ Where the `blacklist.json` file shall look something like this:
 
 </details>
 
-### Dynamic Storages (for experienced users)
+### A furnace isn't getting a BurningStorage? Dynamically register it
 
 Some mods add block entities that can burn fuel, but that, for one reason or another, don't extend the `AbstractFurnaceBlockEntity` abstract class, and thus, they won't automatically get a `BurningStorage`.
 
@@ -114,9 +114,9 @@ Where each `*.json` file shall look something like this (comments are for illust
 
 </details>
 
-### Add Dependencies (for mod developers)
+### As for mod developers
 
-Add the following to your `gradle.build`.
+First things first, to add `Burning` as a dependency, dd the following to your `gradle.build`:
 
 ```gradle
 repositories {
@@ -142,146 +142,6 @@ dependencies {
 
 For more information about the Modrinth maven repository read [here](https://support.modrinth.com/en/articles/8801191-modrinth-maven).
 
-### Basic Usage (for mod developers)
+Then, you can either use it to find `BurningStorage`s to interact with through the `BurningStorage.SIDED` [`BlockApiLookup`](https://github.com/FabricMC/fabric/blob/1.21.11/fabric-api-lookup-api-v1/src/main/java/net/fabricmc/fabric/api/lookup/v1/block/BlockApiLookup.java) object.
 
-Most of the time, as a mod developer using this library, you will only need to access already registered burning storages and transfer burning fuel between them. Here's how to do it.
-
-Get a burning storage:
-
-```java
-import niv.burning.api.BurningStorage;
-
-// What you need
-Level world;
-BlockPos pos;
-
-// How to
-@Nullable
-BurningStorage storage = BurningStorage.SIDED.find(world, pos, null);
-```
-
-Note: for most use cases, `find`'s third argument, which should be a `Direction`, is ignored by the underlying implementation, so it's safe to pass null.
-
-Transfer burning fuel between two storages:
-
-```java
-import niv.burning.api.Burning;
-import niv.burning.api.BurningStorage;
-
-// What you need
-Level level;
-BurningStorage source, target;
-
-// Before 1.21.2, create a burning context, you can use the SimpleBurningContext class or implement one yourself
-BurningContext context = ...;
-
-// After 1.21.2, you can also use the FuelValuesBurningContext wrapper class
-BurningContext context = new FuelValuesBurningContext(level.fuelValues());
-
-// Create the maximum amount of burning fuel to transfer, for instance, half a COAL worth of burning fuel
-Burning burning = Burning.of(Items.COAL, context).withValue(800, context);
-// or if you are using COAL, BLAZE_ROD, or LAVA_BUCKET
-Burning burning = Burning.COAL.withValue(800, context);
-
-// How to
-Burning transferred = BurningStorage.transfer(
-        source, // transfer from this storage
-        target, // to this storage
-        burning, // up to this amount of burning fuel
-        context, // with this burning context
-        null); // creating a new transaction in doing so
-// `transferred` will have the same fuel as `burning`
-```
-
-Transfer an exact amount or nothing:
-
-```java
-import niv.burning.api.Burning;
-import niv.burning.api.BurningStorage;
-
-Level level;
-BurningStorage source, target;
-BurningContext context;
-
-Burning burning = Burning.COAL.withValue(800, context);
-
-try (Transaction transaction = Transaction.openOuter()) {
-    Burning transferred = BurningStorage.transfer(source, target, burning, context, transaction);
-    if (burning.equals(transferred)) {
-        transaction.commit();
-    }
-}
-```
-
-Read the Fabric's Transaction API to understand the last example better.
-
-### Use a burning storage in your block entity (for mod developers)
-
-Instead of implementing the two fields functionally equivalent to `AbstractFurnaceBlockEntity`'s `litTimeRemaining` and `litTotalTime`, do the following:
-
-```java
-
-import niv.burning.api.BurningStorage;
-import niv.burning.api.BurningStorageHelper;
-import niv.burning.api.BurningStorageListener;
-import niv.burning.api.base.SimpleBurningStorage;
-
-public class MyBlockEntity extends BlockEntity implements BurningStorageListener {
-    
-    // Add a simple burning storage to the entity
-    public final SimpleBurningStorage simpleBurningStorage = new SimpleBurningStorage();
-
-    public MyBlockEntity(...) {
-        // ...
-        // Add this to register this entity for changes in the simpleBurningStorage
-        this.simpleBurningStorage.addListener(this);
-    }
-
-    // Add this as a callback
-    @Override
-    public void burningStorageChanged(BurningStorage burningStorage) {
-        // Update this entity LIT property (if any) so to match if the given burningStorage is burning
-        BurningStorageHelper.tryUpdateLitProperty(this, burningStorage);
-        this.setChanged();
-    }
-
-    // And don't forget to add the following for saving and loading the simpleBurningStorage state
-    @Override
-    protected void loadAdditional(ValueInput valueInput) {
-        super.loadAdditional(valueInput);
-        // ...
-        valueInput
-                .read("Burning", SimpleBurningStorage.SNAPSHOT_CODEC)
-                .ifPresent(this.simpleBurningStorage::readSnapshot);
-    }
-
-    @Override
-    protected void saveAdditional(ValueOutput valueOutput) {
-        super.saveAdditional(valueOutput);
-        // ...
-        valueOutput
-                .store("Burning", SimpleBurningStorage.SNAPSHOT_CODEC, this.simpleBurningStorage.createSnapshot());
-    }
-}
-```
-
-Don't forget to register it:
-
-```java
-import niv.burning.api.BurningStorage;
-
-// What you need
-BlockEntityType<MyBlockEntity> MY_BLOCK_ENTITY = ...;
-
-// How to
-BurningStorage.SIDED.registerForBlockEntity((myBlockEntity, direction) -> myBlockEntity.simpleBurningStorage, MY_BLOCK_ENTITY);
-```
-
-Then you can access the equivalent `litTimeRemaining` and `litTotalTime` like:
-
-```java
-this.simpleBurningStorage.getCurrentBurning(); // as the `litTimeRemaining` equivalent
-this.simpleBurningStorage.setCurrentBurning(800);
-this.simpleBurningStorage.getMaxBurning(); // as the `litTotalTime` equivalent
-this.simpleBurningStorage.setMaxBurning(1600);
-```
+Or you can start implementing your own `BurningStorage`. Starting from a [SimpleBurningStorage](src/main/java/niv/burning/api/base/SimpleBurningContext.java) and go on from there!

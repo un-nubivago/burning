@@ -3,15 +3,12 @@ package niv.burning.impl;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 import net.minecraft.world.item.Item;
-import niv.burning.api.BurningStorage;
+import niv.burning.api.base.BurningStorageBlockEntity;
 
 @Internal
-@SuppressWarnings("java:S100")
-public interface AbstractFurnaceBlockEntityExtension {
+public interface AbstractFurnaceBlockEntityExtension extends BurningStorageBlockEntity {
 
-    Item burning_getFuel();
+    Item getInternalBurningFuel();
 
-    void burning_setFuel(Item fuel);
-
-    BurningStorage burning_getBurningStorage();
+    void setInternalBurningFuel(Item fuel);
 }
