@@ -9,7 +9,7 @@
     ],
     "contact": {
         "homepage": "https://modrinth.com/mod/burning",
-        "sources": "https://github.com/NivOridocs/burning"
+        "sources": "https://github.com/un-nubivago/burning"
     },
     "custom": {
         "loom:injected_interfaces": {
