@@ -29,7 +29,7 @@ public class PropagatorGameTest {
                     return false;
                 });
 
-        game.assertValueEqual(matches, found, literal("found positions"));
+        game.assertValueEqual(found, matches, literal("found positions"));
 
         game.succeed();
     }

@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.FuelValues;
 import niv.burning.api.Burning;
@@ -35,7 +36,7 @@ public class FurnaceBurningStorage
 
     private Burning getZero() {
         var fuel = this.target.getInternalBurningFuel();
-        return fuel == null ? Burning.MIN_VALUE : Burning.ofZero(fuel);
+        return fuel == null || Blocks.AIR.asItem().equals(fuel) ? Burning.MIN_VALUE : Burning.ofZero(fuel);
     }
 
     private void setZero(Burning zero) {
