@@ -15,9 +15,6 @@
         "loom:injected_interfaces": {
             "net/minecraft/class_2609": [
                 "niv/burning/impl/AbstractFurnaceBlockEntityExtension"
-            ],
-            "net/minecraft/class_9895": [
-                "niv/burning/api/BurningContext"
             ]
         }
     },

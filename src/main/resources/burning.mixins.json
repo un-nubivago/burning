@@ -3,8 +3,7 @@
     "package": "niv.burning.impl.mixin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
-        "AbstractFurnaceBlockEntityMixin",
-        "FuelValuesMixin"
+        "AbstractFurnaceBlockEntityMixin"
     ],
     "injectors": {
         "defaultRequire": 1

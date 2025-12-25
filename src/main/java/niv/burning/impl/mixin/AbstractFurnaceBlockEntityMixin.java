@@ -26,9 +26,8 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
     private static final String BLOCK_POS = "Lnet/minecraft/core/BlockPos;";
     private static final String BLOCK_STATE = "Lnet/minecraft/world/level/block/state/BlockState;";
     private static final String ENTITY = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;";
-    private static final String FUEL_VALUES = "Lnet/minecraft/world/level/block/entity/FuelValues;";
     private static final String ITEM_STACK = "Lnet/minecraft/world/item/ItemStack;";
-    private static final String SERVER_LEVEL = "Lnet/minecraft/server/level/ServerLevel;";
+    private static final String LEVEL = "Lnet/minecraft/world/level/Level;";
 
     @Unique
     private final BurningStorage internalBurningStorage = new FurnaceBurningStorage(
@@ -59,9 +58,9 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
     }
 
     @Inject( //
-            method = "serverTick(" + SERVER_LEVEL + BLOCK_POS + BLOCK_STATE + ENTITY + ")V", //
+            method = "serverTick(" + LEVEL + BLOCK_POS + BLOCK_STATE + ENTITY + ")V", //
             at = @At(value = "INVOKE", shift = Shift.AFTER, //
-                    target = ENTITY + "getBurnDuration(" + FUEL_VALUES + ITEM_STACK + ")I"))
+                    target = ENTITY + "getBurnDuration(" + ITEM_STACK + ")I"))
     private static void injectAfterGetBurnDuration(CallbackInfo info,
             @Local AbstractFurnaceBlockEntity entity,
             @Local(ordinal = 0) ItemStack itemStack) {

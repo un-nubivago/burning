@@ -1,13 +1,12 @@
 package niv.burning;
 
-import static net.minecraft.network.chat.Component.literal;
-
 import java.util.HashSet;
 import java.util.Set;
 
-import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -15,7 +14,7 @@ import niv.burning.api.BurningPropagator;
 
 public class PropagatorGameTest {
 
-    @GameTest(maxTicks = 5)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void onCopperCube(GameTestHelper game) {
         var matches = setup(game);
         var found = new HashSet<BlockPos>();
@@ -24,12 +23,13 @@ public class PropagatorGameTest {
                 game.getLevel(),
                 game.absolutePos(new BlockPos(4, 4, 4)),
                 (pos, storage) -> {
-                    game.assertFalse(storage == null, literal("Found storage should not be null"));
-                    game.assertTrue(found.add(pos), literal("The same position shouldn't be found more than once"));
+                    game.assertFalse(storage == null, "Found storage should not be null");
+                    game.assertTrue(found.add(pos), "The same position shouldn't be found more than once");
                     return false;
                 });
 
-        game.assertValueEqual(matches, found, literal("found positions"));
+        game.assertTrue(matches.equals(found),
+                "Expected " + matches.toString() + " found positions, got " + found + " instead");
 
         game.succeed();
     }
@@ -62,7 +62,8 @@ public class PropagatorGameTest {
             }
             var pos = new BlockPos(xyz[0], xyz[1], xyz[2]);
             if (result.add(game.absolutePos(pos))) {
-                game.assertBlock(pos, Blocks.AIR::equals, block -> literal("Block should be air, its " + game.getBlockState(pos).getBlock()));
+                game.assertBlock(pos, Blocks.AIR::equals,
+                        "Block should be air, its " + game.getBlockState(pos).getBlock());
                 game.setBlock(pos, blocks[random.nextInt(3)]);
             }
         }

@@ -7,8 +7,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class TestDynamicBurningStorage extends DynamicBurningStorage {
 
-    private static final String TIME = "litTimeRemaining";
-    private static final String DURATION = "litTotalTime";
+    private static final String TIME = "litTime";
+    private static final String DURATION = "litDuration";
 
     public TestDynamicBurningStorage(BlockEntityType<? extends AbstractFurnaceBlockEntity> type, Block block) {
         super(

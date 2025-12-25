@@ -47,7 +47,7 @@ public final class BurningImpl {
          * Register as providers all loaded DynamicBurningStorageProviders.
          */
         ServerLifecycleEvents.SERVER_STARTING.register(server -> server.registryAccess()
-                .lookup(DynamicBurningStorageProvider.REGISTRY).stream()
+                .registry(DynamicBurningStorageProvider.REGISTRY).stream()
                 .flatMap(Registry::stream)
                 .forEach(provider -> BurningStorage.SIDED
                         .registerForBlockEntity(provider::getBurningStorage, provider.type)));

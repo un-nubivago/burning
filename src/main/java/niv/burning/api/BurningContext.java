@@ -1,16 +1,11 @@
 package niv.burning.api;
 
-import java.util.stream.Stream;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.flag.FeatureFlagSet;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.world.level.block.entity.FuelValues;
 import niv.burning.api.base.SimpleBurningContext;
 
 /**
@@ -72,28 +67,54 @@ public interface BurningContext {
      * <p>
      *
      * @return a default burning context
-     * @see {@link SimpleBurningContext#legacyInstance()} for a prior to Minecraft 1.21.2 fuel map
+     * @see {@link SimpleBurningContext#legacyInstance()} for a prior to Minecraft
+     *      1.21.2 fuel map
      * @since 2.0
      * @deprecated As of Burning 2.0, prefer {@link #worldlyContext(Level)}
      */
     @SuppressWarnings("java:S1133")
     @Deprecated(since = "2.0", forRemoval = false)
     static BurningContext defaultContext() {
-        return FuelValues.vanillaBurnTimes(HolderLookup.Provider.create(
-                Stream.of(BuiltInRegistries.ITEM)),
-                FeatureFlagSet.of(FeatureFlags.VANILLA));
+        return DEFAULT;
     }
 
     /**
-     * Returns the burning context bound to the provided {@link Level#fuelValues() level} parameter.
+     * Returns the burning context bound to the provided {@link Level#fuelValues()
+     * level} parameter.
      * <p>
-     * Prior to Minecraft 1.21.2, this returns the same as {@link #defaultContext()}.
+     * Prior to Minecraft 1.21.2, this returns the same as
+     * {@link #defaultContext()}.
      *
      * @param level must not be null
      * @since 2.0
      * @return a burning context that uses the level's fuel values
      */
+    @SuppressWarnings("java:S1172")
     static BurningContext worldlyContext(Level level) {
-        return level.fuelValues();
+        return DEFAULT;
     }
+
+    @Internal
+    static BurningContext DEFAULT = new BurningContext() {
+
+        @Override
+        public boolean isFuel(Item item) {
+            return AbstractFurnaceBlockEntity.isFuel(new ItemStack(item));
+        }
+
+        @Override
+        public boolean isFuel(ItemStack itemStack) {
+            return AbstractFurnaceBlockEntity.isFuel(itemStack);
+        }
+
+        @Override
+        public int burnDuration(Item item) {
+            return AbstractFurnaceBlockEntity.getFuel().getOrDefault(item, 0);
+        }
+
+        @Override
+        public int burnDuration(ItemStack itemStack) {
+            return itemStack.isEmpty() ? 0 : AbstractFurnaceBlockEntity.getFuel().getOrDefault(itemStack.getItem(), 0);
+        }
+    };
 }

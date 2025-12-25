@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.world.level.block.entity.FuelValues;
 import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
@@ -44,16 +43,16 @@ public class FurnaceBurningStorage
 
     @Override
     public Burning insert(Burning burning, BurningContext context, TransactionContext transaction) {
-        context = new Context(this.target, context);
+        context = new Context(this.target);
         int fuelTime = burning.getBurnDuration(context);
         int value = Math.min(
-                Math.max(this.target.litTotalTime, fuelTime) - this.target.litTimeRemaining,
+                Math.max(this.target.litDuration, fuelTime) - this.target.litTime,
                 burning.getValue(context).intValue());
         updateSnapshots(transaction);
-        this.target.litTimeRemaining += value;
-        if ((this.target.litTotalTime > fuelTime && this.target.litTimeRemaining <= fuelTime)
-                || this.target.litTimeRemaining > this.target.litTotalTime) {
-            this.target.litTotalTime = fuelTime;
+        this.target.litTime += value;
+        if ((this.target.litDuration > fuelTime && this.target.litTime <= fuelTime)
+                || this.target.litTime > this.target.litDuration) {
+            this.target.litDuration = fuelTime;
             setZero(burning);
         }
         return burning.withValue(value, context);
@@ -71,27 +70,26 @@ public class FurnaceBurningStorage
 
     @Override
     public Burning getBurning(BurningContext context) {
-        context = new Context(this.target, context);
-        return this.getZero().withValue(this.target.litTimeRemaining, context);
+        return this.getZero().withValue(this.target.litTime, new Context(this.target));
     }
 
     @Override
     public boolean isBurning() {
-        return this.target.litTimeRemaining > 0;
+        return this.target.litTime > 0;
     }
 
     @Override
     protected Snapshot createSnapshot() {
         return new Snapshot(
-                this.target.litTimeRemaining,
-                this.target.litTotalTime,
+                this.target.litTime,
+                this.target.litDuration,
                 this.getZero());
     }
 
     @Override
     protected void readSnapshot(Snapshot snapshot) {
-        this.target.litTimeRemaining = snapshot.currentBurning();
-        this.target.litTotalTime = snapshot.maxBurning();
+        this.target.litTime = snapshot.currentBurning();
+        this.target.litDuration = snapshot.maxBurning();
         this.setZero(snapshot.zero());
     }
 
@@ -105,51 +103,28 @@ public class FurnaceBurningStorage
 
         private final AbstractFurnaceBlockEntity target;
 
-        private final FuelValues fuelValues;
-
-        public Context(AbstractFurnaceBlockEntity target, BurningContext context) {
+        public Context(AbstractFurnaceBlockEntity target) {
             this.target = target;
-            this.fuelValues = new Adapter(context);
         }
 
         @Override
         public boolean isFuel(Item item) {
-            return this.fuelValues.isFuel(new ItemStack(item));
+            return AbstractFurnaceBlockEntity.isFuel(new ItemStack(item));
         }
 
         @Override
         public boolean isFuel(ItemStack itemStack) {
-            return this.fuelValues.isFuel(itemStack);
+            return AbstractFurnaceBlockEntity.isFuel(itemStack);
         }
 
         @Override
         public int burnDuration(Item item) {
-            return this.target.getBurnDuration(this.fuelValues, new ItemStack(item));
+            return this.target.getBurnDuration(new ItemStack(item));
         }
 
         @Override
         public int burnDuration(ItemStack itemStack) {
-            return this.target.getBurnDuration(this.fuelValues, itemStack);
-        }
-    }
-
-    private final class Adapter extends FuelValues {
-
-        private final BurningContext context;
-
-        Adapter(BurningContext context) {
-            super(null);
-            this.context = context;
-        }
-
-        @Override
-        public boolean isFuel(ItemStack itemStack) {
-            return this.context.isFuel(itemStack);
-        }
-
-        @Override
-        public int burnDuration(ItemStack itemStack) {
-            return this.context.burnDuration(itemStack);
+            return this.target.getBurnDuration(itemStack);
         }
     }
 }

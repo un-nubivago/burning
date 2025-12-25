@@ -7,10 +7,6 @@ import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
@@ -29,16 +25,6 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
  * @since 1.0
  */
 public final class Burning {
-
-    /**
-     * Codec to encode/decode instances.
-     */
-    public static final Codec<Burning> CODEC;
-
-    /**
-     * Codec to encode/decode zeroed instances to/from {@link Item items}.
-     */
-    public static final Codec<Burning> ZERO_CODEC;
 
     private static final Map<Item, Burning> ZEROS;
     private static final Map<Item, Burning> ONES;
@@ -72,14 +58,6 @@ public final class Burning {
     public static final Burning MAX_VALUE;
 
     static {
-        CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance
-                .group(
-                        Codec.doubleRange(0d, 1d).fieldOf("percent").orElse(0d).forGetter(Burning::getPercent),
-                        BuiltInRegistries.ITEM.byNameCodec().fieldOf("fuel").forGetter(Burning::getFuel))
-                .apply(instance, Burning::new)));
-
-        ZERO_CODEC = BuiltInRegistries.ITEM.byNameCodec().xmap(Burning::ofZero, Burning::getFuel);
-
         ZEROS = HashMap.newHashMap(50);
         ONES = HashMap.newHashMap(50);
 

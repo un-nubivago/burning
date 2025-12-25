@@ -4,15 +4,13 @@ import java.util.function.IntUnaryOperator;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import niv.burning.api.Burning;
 import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
@@ -62,13 +60,6 @@ import niv.burning.api.BurningStorage;
 public abstract class SimpleBurningStorage
         extends SnapshotParticipant<SimpleBurningStorage.Snapshot>
         implements BurningStorage {
-
-    public static final Codec<Snapshot> SNAPSHOT_CODEC = Codec
-            .lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
-                    Codec.INT.fieldOf("currentBurning").forGetter(Snapshot::currentBurning),
-                    Codec.INT.fieldOf("maxBurning").forGetter(Snapshot::maxBurning),
-                    Burning.ZERO_CODEC.fieldOf("zero").forGetter(Snapshot::zero))
-                    .apply(instance, Snapshot::new)));
 
     public static final record Snapshot(int currentBurning, int maxBurning, Burning zero) {
     }
@@ -133,7 +124,7 @@ public abstract class SimpleBurningStorage
     /**
      * Sets a new maximum burning duration to <code>value</code>, or to 0 if
      * <code>value</code> is negative.
-     * <p>input
+     * <p>
      * Also sets the current remaining burning time to the new maximum is the former
      * is greater than the latter.
      *
@@ -152,8 +143,12 @@ public abstract class SimpleBurningStorage
      *
      * @param input
      */
-    public void load(ValueInput input) {
-        input.read("BurningSnapshot", SNAPSHOT_CODEC).ifPresent(this::readSnapshot);
+    public void load(CompoundTag compoundTag) {
+        var snapshotTag = compoundTag.getCompound("BurningSnapshot");
+        this.readSnapshot(new Snapshot(
+                snapshotTag.getInt("CurrentBurning"),
+                snapshotTag.getInt("MaxBurning"),
+                Burning.ofZero(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(snapshotTag.getString("Zero"))))));
     }
 
     /**
@@ -162,8 +157,13 @@ public abstract class SimpleBurningStorage
      *
      * @param output
      */
-    public void save(ValueOutput output) {
-        output.store("BurningSnapshot", SNAPSHOT_CODEC, this.createSnapshot());
+    public void save(CompoundTag compoundTag) {
+        var snapshotTag = new CompoundTag();
+        var snapshot = this.createSnapshot();
+        snapshotTag.putInt("CurrentBurning", snapshot.currentBurning());
+        snapshotTag.putInt("MaxBurning", snapshot.maxBurning());
+        snapshotTag.putString("Zero", BuiltInRegistries.ITEM.getKey(snapshot.zero().getFuel()).toString());
+        compoundTag.put("BurningSnapshot", snapshotTag);
     }
 
     // From {@link SnapshotParticipant}
