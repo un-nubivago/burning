@@ -58,8 +58,8 @@ public final class Burning {
     public static final Burning MAX_VALUE;
 
     static {
-        ZEROS = HashMap.newHashMap(50);
-        ONES = HashMap.newHashMap(50);
+        ZEROS = new HashMap<>(50);
+        ONES = new HashMap<>(50);
 
         LAVA_BUCKET = new Burning(0d, Items.LAVA_BUCKET).one().zero();
         BLAZE_ROD = new Burning(0d, Items.BLAZE_ROD).one().zero();

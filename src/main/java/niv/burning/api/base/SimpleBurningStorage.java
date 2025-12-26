@@ -109,7 +109,9 @@ public abstract class SimpleBurningStorage
      *              current maximum burning duration
      */
     public void setCurrentBurning(int value) {
-        this.currentBurning = Math.clamp(value, 0, this.maxBurning);
+        value = value < 0 ? 0 : value;
+        value = value > this.maxBurning ? this.maxBurning : value;
+        this.currentBurning = value;
     }
 
     /**
