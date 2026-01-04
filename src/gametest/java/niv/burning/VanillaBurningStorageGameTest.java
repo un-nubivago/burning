@@ -9,22 +9,19 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import niv.burning.api.Burning;
-import niv.burning.api.BurningContext;
 import niv.burning.api.BurningStorage;
+import niv.burning.api.FuelVariant;
+import niv.burning.api.FurnaceStorage;
 
 public class VanillaBurningStorageGameTest {
 
-    private static final MutableComponent SHOULD_BE_BURNING = literal("BurningStorage should be burning");
-
-    private static final MutableComponent SHOULD_NOT_BE_BURNING = literal("BurningStorage shouldn't be burning");
-
-    private static final MutableComponent BURNING = literal("Burning");
+    private static final String STRING_BURNING = "Burning";
+    private static final String STRING_SHOULD_BE_BURNING = "BurningStorage should be burning";
+    private static final String STRING_SHOULD_NOT_BE_BURNING = "BurningStorage should not be burning";
 
     private static final BlockPos POS = new BlockPos(4, 4, 4);
 
@@ -48,17 +45,12 @@ public class VanillaBurningStorageGameTest {
 
     private void runCommonSequence(GameTestHelper game, Item material, int speed) {
 
-        var context = BurningContext.worldlyContext(game.getLevel());
-        var coal = Burning.COAL.one().getValue(context).intValue();
-        var lavalBucket = Burning.LAVA_BUCKET.one().getValue(context).intValue();
-
-        var storage = BurningStorage.SIDED.find(game.getLevel(), game.absolutePos(POS), null);
-        game.assertFalse(storage == null, literal("BurningStorage found null"));
+        var storage = (FurnaceStorage) BurningStorage.SIDED.find(game.getLevel(), game.absolutePos(POS), null);
+        game.assertFalse(storage == null, literal("BurningStorage not found, it should have"));
 
         game.runAtTickTime(1, () -> {
             game.assertBlockProperty(POS, BlockStateProperties.LIT, Boolean.FALSE);
-            game.assertFalse(storage.isBurning(), SHOULD_NOT_BE_BURNING);
-            game.assertValueEqual(storage.getBurning(context), Burning.MIN_VALUE, BURNING);
+            game.assertTrue(storage.isResourceBlank(), literal(STRING_SHOULD_NOT_BE_BURNING));
         });
 
         game.runAtTickTime(2, () -> {
@@ -71,8 +63,7 @@ public class VanillaBurningStorageGameTest {
 
         game.runAtTickTime(3, () -> {
             game.assertBlockProperty(POS, BlockStateProperties.LIT, Boolean.FALSE);
-            game.assertFalse(storage.isBurning(), SHOULD_NOT_BE_BURNING);
-            game.assertValueEqual(storage.getBurning(context), Burning.MIN_VALUE, BURNING);
+            game.assertTrue(storage.isResourceBlank(), literal(STRING_SHOULD_NOT_BE_BURNING));
         });
 
         game.runAtTickTime(4, () -> {
@@ -85,32 +76,33 @@ public class VanillaBurningStorageGameTest {
 
         game.runAtTickTime(5, () -> {
             game.assertBlockProperty(POS, BlockStateProperties.LIT, Boolean.TRUE);
-            game.assertTrue(storage.isBurning(), SHOULD_BE_BURNING);
-            game.assertValueEqual(storage.getBurning(context), Burning.COAL.one(), BURNING);
+            game.assertFalse(storage.isResourceBlank(), literal(STRING_SHOULD_BE_BURNING));
+            game.assertValueEqual(storage.getAmount(), 1L * 1600 * speed, literal(STRING_BURNING));
         });
 
         game.runAtTickTime(6, () -> {
             game.assertBlockProperty(POS, BlockStateProperties.LIT, Boolean.TRUE);
-            game.assertTrue(storage.isBurning(), SHOULD_BE_BURNING);
-            game.assertValueEqual(storage.getBurning(context), Burning.COAL.withValue(coal - speed, context), BURNING);
+            game.assertFalse(storage.isResourceBlank(), literal(STRING_SHOULD_BE_BURNING));
+            game.assertValueEqual(storage.getAmount(), 1L * (1600 - 1) * speed, literal(STRING_BURNING));
         });
 
         game.runAtTickTime(7, () -> {
             try (var transaction = Transaction.openOuter()) {
-                storage.insert(Burning.LAVA_BUCKET.one(), context, transaction);
+                storage.insert(FuelVariant.LAVA_BUCKET, 1L * 20000 * speed, transaction);
                 transaction.commit();
             }
         });
 
         game.runAtTickTime(8, () -> {
             game.assertBlockProperty(POS, BlockStateProperties.LIT, Boolean.TRUE);
-            game.assertTrue(storage.isBurning(), SHOULD_BE_BURNING);
-            game.assertValueEqual(storage.getBurning(context),
-                    Burning.LAVA_BUCKET.withValue(lavalBucket - speed, context), BURNING);
+            game.assertFalse(storage.isResourceBlank(), literal(STRING_SHOULD_BE_BURNING));
+            game.assertValueEqual(storage.getAmount(), 1L * (20000 - 1) * speed, literal(STRING_BURNING));
         });
 
         game.startSequence()
                 .thenIdle(10)
                 .thenSucceed();
+
+        game.succeed();
     }
 }
