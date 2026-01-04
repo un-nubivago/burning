@@ -12,7 +12,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Items;
 import niv.burning.api.FuelVariant;
-import niv.burning.impl.TestBurning;
+import niv.burning.impl.CommonUtils;
 
 class SimpleBurningStorageTests {
 
@@ -20,7 +20,7 @@ class SimpleBurningStorageTests {
     static void setup() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
-        TestBurning.initialize();
+        CommonUtils.initialize();
     }
 
     @Test
@@ -73,7 +73,8 @@ class SimpleBurningStorageTests {
         assertFalse(storage.getResource().isBlank());
 
         // test insertion into full
-        storage.readSnapshot(new SimpleBurningStorage.Snapshot(FuelVariant.BLAZE_ROD, 2400 * 5 / 3));
+        storage.variant = FuelVariant.BLAZE_ROD;
+        storage.amount = 2400 * 5 / 3;
         try (var transaction = Transaction.openOuter()) {
             assertEquals(0, storage.insert(FuelVariant.of(Items.BLAZE_ROD), 1200, transaction));
             transaction.commit();
@@ -90,7 +91,8 @@ class SimpleBurningStorageTests {
     @Test
     void testOverInsertion() {
         var storage = new SimpleBurningStorage();
-        storage.readSnapshot(new SimpleBurningStorage.Snapshot(FuelVariant.BLAZE_ROD, 1800));
+        storage.variant = FuelVariant.BLAZE_ROD;
+        storage.amount = 1800;
 
         // test over-insertion with same variant
         try (var transaction = Transaction.openOuter()) {
@@ -132,7 +134,8 @@ class SimpleBurningStorageTests {
     @Test
     void testExtraction() {
         var storage = new SimpleBurningStorage(x -> x * 5 / 3);
-        storage.readSnapshot(new SimpleBurningStorage.Snapshot(FuelVariant.BLAZE_ROD, 1800 * 5 / 3));
+        storage.variant = FuelVariant.BLAZE_ROD;
+        storage.amount = 1800 * 5 / 3;
 
         // test cancelled extraction
         try (var transaction = Transaction.openOuter()) {
@@ -183,7 +186,8 @@ class SimpleBurningStorageTests {
     @Test
     void testUnderExtraction() {
         var storage = new SimpleBurningStorage();
-        storage.readSnapshot(new SimpleBurningStorage.Snapshot(FuelVariant.BLAZE_ROD, 1800));
+        storage.variant = FuelVariant.BLAZE_ROD;
+        storage.amount = 1800;
 
         // test over-extraction with same variant
         try (var transaction = Transaction.openOuter()) {

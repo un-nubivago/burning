@@ -1,4 +1,4 @@
-package niv.burning.impl;
+package niv.burning.api.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import net.fabricmc.fabric.api.transfer.v1.storage.base.ResourceAmount;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
@@ -16,7 +17,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import niv.burning.api.FuelVariant;
 import niv.burning.api.FurnaceStorage;
-import niv.burning.api.base.SimpleBurningStorage.Snapshot;
+import niv.burning.impl.DefaultFurnaceStorage;
+import niv.burning.impl.CommonUtils;
 
 class DefaultFurnaceStorageTests {
 
@@ -24,7 +26,7 @@ class DefaultFurnaceStorageTests {
     static void setup() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
-        TestBurning.initialize();
+        CommonUtils.initialize();
     }
 
     private FurnaceStorage newInstance() {
@@ -81,7 +83,7 @@ class DefaultFurnaceStorageTests {
         assertFalse(storage.getResource().isBlank());
 
         // test insertion into full
-        ((DefaultFurnaceStorage) storage).readSnapshot(new Snapshot(FuelVariant.BLAZE_ROD, 2400));
+        ((DefaultFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 2400));
         try (var transaction = Transaction.openOuter()) {
             assertEquals(0, storage.insert(FuelVariant.of(Items.BLAZE_ROD), 1200, transaction));
             transaction.commit();
@@ -98,7 +100,7 @@ class DefaultFurnaceStorageTests {
     @Test
     void testOverInsertion() {
         var storage = newInstance();
-        ((DefaultFurnaceStorage) storage).readSnapshot(new Snapshot(FuelVariant.BLAZE_ROD, 1800));
+        ((DefaultFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 1800));
 
         // test over-insertion with same variant
         try (var transaction = Transaction.openOuter()) {
@@ -140,7 +142,7 @@ class DefaultFurnaceStorageTests {
     @Test
     void testExtraction() {
         var storage = newInstance();
-        ((DefaultFurnaceStorage) storage).readSnapshot(new Snapshot(FuelVariant.BLAZE_ROD, 1800));
+        ((DefaultFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 1800));
 
         // test unsupported extraction
         try (var transaction = Transaction.openOuter()) {
@@ -155,7 +157,7 @@ class DefaultFurnaceStorageTests {
         assertFalse(storage.getResource().isBlank());
 
         // test unsupported extraction from empty
-        ((DefaultFurnaceStorage) storage).readSnapshot(new Snapshot(FuelVariant.BLAZE_ROD, 0));
+        ((DefaultFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 0));
         try (var transaction = Transaction.openOuter()) {
             assertEquals(0, storage.extract(FuelVariant.of(Items.BLAZE_ROD), 1200, transaction));
             transaction.commit();

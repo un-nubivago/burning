@@ -24,7 +24,7 @@ public interface FuelVariant extends TransferVariant<Item> {
                     BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("fuel").forGetter(FuelVariant::getRegistryEntry))
             .apply(instance, DefaultFuelVariant::of));
 
-    StreamCodec<RegistryFriendlyByteBuf, FuelVariant> PACKET_CODEC = StreamCodec.composite(
+    StreamCodec<RegistryFriendlyByteBuf, FuelVariant> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.holderRegistry(Registries.ITEM), FuelVariant::getRegistryEntry,
             DefaultFuelVariant::of);
 

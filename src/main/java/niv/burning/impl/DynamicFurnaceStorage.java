@@ -2,23 +2,16 @@ package niv.burning.impl;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
 
-import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.FuelVariant;
-import niv.burning.api.FurnaceStorage;
+import niv.burning.api.base.AbstractFurnaceStorage;
 import niv.burning.api.base.BurningStorageBlockEntity;
-import niv.burning.api.base.SimpleBurningStorage;
-import niv.burning.api.base.SimpleBurningStorage.Snapshot;
 
 @Internal
-public class DynamicFurnaceStorage
-        extends SnapshotParticipant<SimpleBurningStorage.Snapshot>
-        implements FurnaceStorage {
+public class DynamicFurnaceStorage extends AbstractFurnaceStorage {
 
     private final DynamicFurnaceStorageProvider provider;
 
@@ -31,32 +24,26 @@ public class DynamicFurnaceStorage
         this.target = target;
     }
 
-    // FurnaceStorage
+    // AbstractFurnaceStorage
 
     @Override
-    public long insert(FuelVariant resource, long maxAmount, TransactionContext transaction) {
-        StoragePreconditions.notBlankNotNegative(resource, maxAmount);
-
-        var oldCapacity = getCapacity();
-        var newCapacity = Burning.fuelValues().burnDuration(new ItemStack(resource.getFuel()));
-        var oldAmount = getAmount();
-        var newAmount = Math.clamp(oldAmount + maxAmount, 0, Math.max(oldCapacity, newCapacity));
-        if (newAmount <= oldAmount)
-            return 0L;
-
-        updateSnapshots(transaction);
-
-        if (newAmount > oldCapacity) {
-            this.fuel = resource.getFuel();
-            this.provider.litDuration.set(this.target, .0 + newCapacity);
-        }
-        this.provider.litTime.set(this.target, .0 + newAmount);
-
-        if (this.provider.litTime.get(this.target) <= 0)
-            this.fuel = Items.AIR;
-
-        return newAmount - oldAmount;
+    protected long getCapacity(FuelVariant variant) {
+        return Burning.fuelValues().burnDuration(new ItemStack(variant.getFuel()));
     }
+
+    @Override
+    protected void setResource(FuelVariant resource) {
+        this.fuel = resource.getFuel();
+        this.provider.litDuration.set(this.target, .0 + getCapacity(resource));
+
+    }
+
+    @Override
+    protected void setAmount(long amount) {
+        this.provider.litTime.set(this.target, .0 + amount);
+    }
+
+    // FurnaceStorage
 
     @Override
     public FuelVariant getResource() {
@@ -76,21 +63,9 @@ public class DynamicFurnaceStorage
     // SnapshotParticipant
 
     @Override
-    protected Snapshot createSnapshot() {
-        return new Snapshot(getResource(), getAmount());
-    }
-
-    @Override
-    protected void readSnapshot(Snapshot snapshot) {
-        this.fuel = snapshot.resource().getFuel();
-        this.provider.litDuration.set(target, .0 + snapshot.resource().getDuration());
-        this.provider.litTime.set(target, .0 + snapshot.amount());
-    }
-
-    @Override
     protected void onFinalCommit() {
         if (this.target.hasLevel()) {
-            BurningStorageBlockEntity.tryUpdateLitProperty(this.target, this.provider.litTime.get(this.target) > 0);
+            BurningStorageBlockEntity.tryUpdateLitProperty(this.target, getAmount() > 0);
             this.target.setChanged();
         }
     }

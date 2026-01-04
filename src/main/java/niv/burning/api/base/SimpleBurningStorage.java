@@ -4,13 +4,9 @@ import java.util.function.IntUnaryOperator;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import niv.burning.api.FuelVariant;
 
 /**
@@ -55,24 +51,9 @@ import niv.burning.api.FuelVariant;
  *
  * @since 1.0
  */
-public class SimpleBurningStorage
-        extends SnapshotParticipant<SimpleBurningStorage.Snapshot>
-        implements SingleSlotStorage<FuelVariant> {
-
-    public static final record Snapshot(FuelVariant resource, long amount) {
-    }
-
-    public static final Codec<Snapshot> SNAPSHOT_CODEC = Codec
-            .lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
-                    FuelVariant.CODEC.fieldOf("resource").forGetter(Snapshot::resource),
-                    Codec.LONG.fieldOf("amount").forGetter(Snapshot::amount))
-                    .apply(instance, Snapshot::new)));
+public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
 
     protected final IntUnaryOperator operator;
-
-    protected FuelVariant resource;
-
-    protected long amount;
 
     /**
      * Class constructor.
@@ -88,8 +69,20 @@ public class SimpleBurningStorage
      */
     public SimpleBurningStorage(@Nullable IntUnaryOperator operator) {
         this.operator = operator == null ? IntUnaryOperator.identity() : operator;
-        this.resource = FuelVariant.BLANK;
+        this.variant = FuelVariant.BLANK;
         this.amount = 0L;
+    }
+
+    // SingleVariantStorage
+
+    @Override
+    protected FuelVariant getBlankVariant() {
+        return FuelVariant.BLANK;
+    }
+
+    @Override
+    protected long getCapacity(FuelVariant variant) {
+        return this.operator.applyAsInt(variant.getDuration());
     }
 
     // SingleSlotStorage
@@ -109,12 +102,12 @@ public class SimpleBurningStorage
         updateSnapshots(transaction);
 
         if (newAmount > oldCapacity) {
-            this.resource = resource;
+            this.variant = resource;
         }
         this.amount = newAmount;
 
         if (this.amount <= 0)
-            this.resource = FuelVariant.BLANK;
+            this.variant = FuelVariant.BLANK;
 
         return (newAmount - oldAmount) * resource.getDuration() / newCapacity;
     }
@@ -134,50 +127,12 @@ public class SimpleBurningStorage
         updateSnapshots(transaction);
 
         if (oldCapacity > newCapacity && newAmount <= newCapacity)
-            this.resource = resource;
+            this.variant = resource;
         this.amount = newAmount;
 
         if (this.amount <= 0)
-            this.resource = FuelVariant.BLANK;
+            this.variant = FuelVariant.BLANK;
 
         return (oldAmount - newAmount) * resource.getDuration() / newCapacity;
-    }
-
-    @Override
-    public boolean isResourceBlank() {
-        return this.resource.isBlank();
-    }
-
-    @Override
-    public FuelVariant getResource() {
-        return this.resource;
-    }
-
-    @Override
-    public long getAmount() {
-        return this.amount;
-    }
-
-    @Override
-    public long getCapacity() {
-        return this.operator.applyAsInt(this.resource.getDuration());
-    }
-
-    // SnapshotParticipant
-
-    @Override
-    public Snapshot createSnapshot() {
-        return new Snapshot(getResource(), getAmount());
-    }
-
-    @Override
-    public void readSnapshot(Snapshot snapshot) {
-        this.resource = snapshot.resource();
-        this.amount = snapshot.amount();
-    }
-
-    @Override
-    protected void onFinalCommit() {
-        // Default abstract method
     }
 }

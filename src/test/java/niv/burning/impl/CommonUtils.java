@@ -2,16 +2,31 @@ package niv.burning.impl;
 
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntSortedMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.FuelValues;
+import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
+import niv.burning.api.FurnaceStorage;
 
-public class TestBurning {
-    private TestBurning() {
+public class CommonUtils {
+    private CommonUtils() {
     }
 
+    private static final String TIME;
+    private static final String DURATION;
+
+    private static final DynamicFurnaceStorageProvider PROVIDER;
+
     static {
+
+        TIME = "litTimeRemaining";
+        DURATION = "litTotalTime";
+
+        PROVIDER = DynamicFurnaceStorageProvider.from(BlockEntityType.FURNACE, TIME, DURATION);
+
         Burning.fuelValuesGetter = () -> {
             var map = new Object2IntLinkedOpenHashMap<Item>();
             map.put(Items.LAVA_BUCKET, 20000);
@@ -65,6 +80,11 @@ public class TestBurning {
         protected OpenFuelValues(Object2IntSortedMap<Item> object2IntSortedMap) {
             super(object2IntSortedMap);
         }
+    }
+
+    public static FurnaceStorage newDynamicFurnace() {
+        return new DynamicFurnaceStorage(PROVIDER,
+                new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState()));
     }
 
     public static final void initialize() {
