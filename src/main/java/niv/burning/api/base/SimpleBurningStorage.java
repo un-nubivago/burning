@@ -1,19 +1,9 @@
 package niv.burning.api.base;
 
-import java.util.function.IntUnaryOperator;
-
-import org.jetbrains.annotations.Nullable;
-
+import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import niv.burning.api.Burning;
-import niv.burning.api.BurningContext;
-import niv.burning.api.BurningStorage;
+import niv.burning.api.FuelVariant;
 
 /**
  * Provides a simple burning storage implementation that supports insertion and
@@ -57,206 +47,83 @@ import niv.burning.api.BurningStorage;
  *
  * @since 1.0
  */
-public abstract class SimpleBurningStorage
-        extends SnapshotParticipant<SimpleBurningStorage.Snapshot>
-        implements BurningStorage {
-
-    public static final record Snapshot(int currentBurning, int maxBurning, Burning zero) {
-    }
-
-    protected final IntUnaryOperator operator;
-
-    protected int currentBurning;
-
-    protected int maxBurning;
-
-    protected Burning zero;
+public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
 
     /**
      * Class constructor.
      */
     public SimpleBurningStorage() {
-        this(null);
+        this.variant = FuelVariant.BLANK;
+        this.amount = 0L;
     }
 
-    /**
-     * Class constructor with custom burn duration operator.
-     *
-     * @param operator operator to apply to every obtained burn duration
-     */
-    public SimpleBurningStorage(@Nullable IntUnaryOperator operator) {
-        this.operator = operator == null ? IntUnaryOperator.identity() : operator;
-        this.currentBurning = 0;
-        this.maxBurning = 0;
-        this.zero = Burning.MIN_VALUE;
-    }
-
-    /**
-     * Gets this storage remaining burning time.
-     *
-     * @return a non-negative integer
-     */
-    public int getCurrentBurning() {
-        return currentBurning;
-    }
-
-    /**
-     * Sets this storage remaining burning time to <code>value</code>, to 0 if
-     * <code>value</code> is negative, or to the current maximum burning duration if
-     * <code>value</code> is greater than that.
-     *
-     * @param value the new remaining burning time, clamped to fit between 0 and the
-     *              current maximum burning duration
-     */
-    public void setCurrentBurning(int value) {
-        value = value < 0 ? 0 : value;
-        value = value > this.maxBurning ? this.maxBurning : value;
-        this.currentBurning = value;
-    }
-
-    /**
-     * Gets the last-set maximum burning duration.
-     *
-     * @return a non-negative integer
-     */
-    public int getMaxBurning() {
-        return maxBurning;
-    }
-
-    /**
-     * Sets a new maximum burning duration to <code>value</code>, or to 0 if
-     * <code>value</code> is negative.
-     * <p>
-     * Also sets the current remaining burning time to the new maximum is the former
-     * is greater than the latter.
-     *
-     * @param value the new maximum
-     */
-    public void setMaxBurning(int value) {
-        this.maxBurning = Math.max(0, value);
-        if (this.currentBurning > this.maxBurning) {
-            this.currentBurning = this.maxBurning;
-        }
-    }
-
-    /**
-     * Loads this burning storage internal status from <code>input</code> using the
-     * the tag name "BurningStorage".
-     *
-     * @param input
-     */
-    public void load(CompoundTag compoundTag) {
-        var snapshotTag = compoundTag.getCompound("BurningSnapshot");
-        this.readSnapshot(new Snapshot(
-                snapshotTag.getInt("CurrentBurning"),
-                snapshotTag.getInt("MaxBurning"),
-                Burning.ofZero(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(snapshotTag.getString("Zero"))))));
-    }
-
-    /**
-     * Saves this burning storage internal status to <code>output</code> using the
-     * the tag name "BurningStorage".
-     *
-     * @param output
-     */
-    public void save(CompoundTag compoundTag) {
-        var snapshotTag = new CompoundTag();
-        var snapshot = this.createSnapshot();
-        snapshotTag.putInt("CurrentBurning", snapshot.currentBurning());
-        snapshotTag.putInt("MaxBurning", snapshot.maxBurning());
-        snapshotTag.putString("Zero", BuiltInRegistries.ITEM.getKey(snapshot.zero().getFuel()).toString());
-        compoundTag.put("BurningSnapshot", snapshotTag);
-    }
-
-    // From {@link SnapshotParticipant}
+    // SingleVariantStorage
 
     @Override
-    public Snapshot createSnapshot() {
-        return new Snapshot(this.currentBurning, this.maxBurning, this.zero);
+    protected FuelVariant getBlankVariant() {
+        return FuelVariant.BLANK;
     }
 
     @Override
-    public void readSnapshot(Snapshot snapshot) {
-        this.currentBurning = snapshot.currentBurning;
-        this.maxBurning = snapshot.maxBurning;
-        this.zero = snapshot.zero;
+    protected long getCapacity(FuelVariant variant) {
+        return variant.getDuration();
     }
 
-    @Override
-    protected abstract void onFinalCommit();
-
-    // From {@link BurningStorage}
+    // SingleSlotStorage
 
     @Override
-    public Burning insert(Burning burning, BurningContext context, TransactionContext transaction) {
-        context = new Context(context, this.operator);
-        int fuelTime = burning.getBurnDuration(context);
-        int value = Math.min(
-                Math.max(this.maxBurning, fuelTime) - this.currentBurning,
-                burning.getValue(context).intValue());
+    public long insert(FuelVariant resource, long maxAmount, TransactionContext transaction) {
+        StoragePreconditions.notBlankNotNegative(resource, maxAmount);
+
+        var oldCapacity = getCapacity();
+        var newCapacity = resource.getDuration();
+        var oldAmount = getAmount();
+        var newAmount = clamp(oldAmount + maxAmount, 0, Math.max(oldCapacity, newCapacity));
+        if (newAmount <= oldAmount)
+            return 0L;
+
         updateSnapshots(transaction);
-        this.currentBurning += value;
-        if ((this.maxBurning > fuelTime && this.currentBurning <= fuelTime) || this.currentBurning > this.maxBurning) {
-            this.maxBurning = fuelTime;
-            this.zero = burning.zero();
+
+        if (newAmount > oldCapacity) {
+            this.variant = resource;
         }
-        return burning.withValue(value, context);
+        this.amount = newAmount;
+
+        if (this.amount <= 0)
+            this.variant = FuelVariant.BLANK;
+
+        return (newAmount - oldAmount) * resource.getDuration() / newCapacity;
     }
 
     @Override
-    public Burning extract(Burning burning, BurningContext context, TransactionContext transaction) {
-        context = new Context(context, this.operator);
-        int fuelTime = burning.getBurnDuration(context);
-        int value = Math.min(this.currentBurning, burning.getValue(context).intValue());
+    public long extract(FuelVariant resource, long maxAmount, TransactionContext transaction) {
+        StoragePreconditions.notBlankNotNegative(resource, maxAmount);
+
+        var oldCapacity = getCapacity();
+        var newCapacity = resource.getDuration();
+        var oldAmount = getAmount();
+        var newAmount = clamp(oldAmount - maxAmount, 0, Math.max(oldCapacity, newCapacity));
+        if (newAmount >= oldAmount)
+            return 0L;
+
         updateSnapshots(transaction);
-        this.currentBurning -= value;
-        if (this.maxBurning > fuelTime && this.currentBurning <= fuelTime) {
-            this.maxBurning = fuelTime;
-            this.zero = burning.zero();
-        }
-        return burning.withValue(value, context);
+
+        if (oldCapacity > newCapacity && newAmount <= newCapacity)
+            this.variant = resource;
+        this.amount = newAmount;
+
+        if (this.amount <= 0)
+            this.variant = FuelVariant.BLANK;
+
+        return (oldAmount - newAmount) * resource.getDuration() / newCapacity;
     }
 
-    @Override
-    public Burning getBurning(BurningContext context) {
-        context = new Context(context, this.operator);
-        return this.zero.withValue(this.currentBurning, context);
-    }
-
-    @Override
-    public boolean isBurning() {
-        return this.currentBurning > 0;
-    }
-
-    private static final class Context implements BurningContext {
-
-        private final BurningContext source;
-
-        private final IntUnaryOperator operator;
-
-        public Context(BurningContext source, IntUnaryOperator operator) {
-            this.source = source;
-            this.operator = operator;
-        }
-
-        @Override
-        public boolean isFuel(ItemStack itemStack) {
-            return this.source.isFuel(itemStack);
-        }
-
-        @Override
-        public boolean isFuel(Item item) {
-            return this.source.isFuel(item);
-        }
-
-        @Override
-        public int burnDuration(ItemStack itemStack) {
-            return this.operator.applyAsInt(this.source.burnDuration(itemStack));
-        }
-
-        @Override
-        public int burnDuration(Item item) {
-            return this.operator.applyAsInt(this.source.burnDuration(item));
-        }
+    private static final long clamp(long amount, long min, long max) {
+        if (amount < min)
+            return min;
+        else if (amount > max)
+            return max;
+        else
+            return (int) amount;
     }
 }

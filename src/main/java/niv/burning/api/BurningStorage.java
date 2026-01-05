@@ -1,185 +1,103 @@
 package niv.burning.api;
 
+import java.util.function.Function;
+
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.include.com.google.common.base.Objects;
 
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup.BlockApiProvider;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import niv.burning.api.base.BurningStorageBlockEntity;
 
-/**
- * Represents a storage for {@link Burning} fuel values, supporting insertion,
- * extraction,
- * and querying of burning state. Implementations may represent block entities
- * or other
- * in-world objects that can store and transfer burning energy.
- *
- * @since 1.0
- */
-public interface BurningStorage {
+public final class BurningStorage {
 
-    /**
-     * Sided block access to burning storages.
-     * <p>
-     * The {@code Direction} parameter may be null, meaning that the full storage
-     * (ignoring side restrictions) should be queried.
-     * Refer to {@link BlockApiLookup} for documentation on how to use this field.
-     */
-    BlockApiLookup<BurningStorage, @Nullable Direction> SIDED = BlockApiLookup.get(
-            ResourceLocation.tryParse("burning:sided_storage"),
-            BurningStorage.class, Direction.class);
+    public static final BlockApiLookup<Storage<FuelVariant>, @Nullable Direction> SIDED = new RecursionSafeWrapper(
+            BlockApiLookup.get(
+                    ResourceLocation.tryParse("burning:sided_storage"),
+                    Storage.asClass(), Direction.class));
 
-    /**
-     * An immutable instance that is always empty and does not support insertion or
-     * extraction.
-     */
-    BurningStorage EMPTY = new BurningStorage() {
-        @Override
-        public boolean supportsInsertion() {
-            return false;
-        }
+    static final ThreadLocal<Function<BlockApiLookup<Storage<FuelVariant>, @Nullable Direction>, BlockApiProvider<Storage<FuelVariant>, @Nullable Direction>>> GUARD = ThreadLocal
+            .withInitial(() -> lookup -> lookup::find);
 
-        @Override
-        public Burning insert(Burning burning, BurningContext context, TransactionContext transaction) {
-            return burning.zero();
-        }
-
-        @Override
-        public boolean supportsExtraction() {
-            return false;
-        }
-
-        @Override
-        public Burning extract(Burning burning, BurningContext context, TransactionContext transaction) {
-            return burning.zero();
-        }
-
-        @Override
-        public Burning getBurning(BurningContext context) {
-            return Burning.MIN_VALUE;
-        }
-
-        @Override
-        public boolean isBurning() {
-            return false;
-        }
-    };
-
-    /**
-     * Indicates whether this storage supports insertion of {@link Burning} values.
-     * <p>
-     * Returns false if calling {@link #insert} will always return a zeroed
-     * {@link Burning},
-     * true otherwise or in doubt.
-     * <p>
-     * Note: This function is meant to be used by pipes or other devices that can
-     * transfer {@link Burning} to know if they should interact with this storage at
-     * all.
-     *
-     * @return true if {@link #insert} can return something other than a zeroed
-     *         {@link Burning}, false otherwise
-     */
-    default boolean supportsInsertion() {
-        return true;
+    static {
+        /*
+         * Register fallback for block entities implementing the
+         * BurningStorageBlockEntity interface.
+         *
+         * Note: AbstractFurnaceBlockEntity implements BurningStorageBlockEntity.
+         */
+        SIDED.registerFallback((world, pos, state, entity, side) -> {
+            if (entity instanceof BurningStorageBlockEntity getter) {
+                return getter.getBurningStorage(side);
+            } else {
+                return null;
+            }
+        });
     }
 
-    /**
-     * Attempts to insert the provided {@link Burning} into this storage.
-     *
-     * @param burning     the {@link Burning} to insert
-     * @param context     the {@link BurningContext} to use
-     * @param transaction the transaction this operation is part of
-     * @return an instance of {@link Burning} with the same fuel and less than or
-     *         equal percentage
-     *         than the one passed as argument: the amount that was inserted
-     */
-    Burning insert(Burning burning, BurningContext context, TransactionContext transaction);
-
-    /**
-     * Indicates whether this storage supports extraction of {@link Burning} values.
-     * <p>
-     * Returns false if calling {@link #extract} will always return a zeroed
-     * {@link Burning},
-     * true otherwise or in doubt.
-     * <p>
-     * Note: This function is meant to be used by pipes or other devices that can
-     * transfer {@link Burning} to know if they should interact with this storage at
-     * all.
-     *
-     * @return true if {@link #extract} can return something other than a zeroed
-     *         {@link Burning}, false otherwise
-     */
-    default boolean supportsExtraction() {
-        return true;
+    private BurningStorage() {
     }
 
-    /**
-     * Attempts to extract up to the provided {@link Burning} from this storage.
-     *
-     * @param burning     the {@link Burning} to extract
-     * @param context     the {@link BurningContext} to use
-     * @param transaction the transaction this operation is part of
-     * @return an instance of {@link Burning} with the same fuel and less than or
-     *         equal percentage
-     *         than the one passed as argument: the amount that was extracted
-     */
-    Burning extract(Burning burning, BurningContext context, TransactionContext transaction);
+    private static final record RecursionSafeWrapper(BlockApiLookup<Storage<FuelVariant>, @Nullable Direction> lookup)
+            implements BlockApiLookup<Storage<FuelVariant>, @Nullable Direction> {
 
-    /**
-     * Returns the currently contained {@link Burning} in this storage.
-     *
-     * @param context the {@link BurningContext} to use
-     * @return the currently contained {@link Burning}
-     */
-    Burning getBurning(BurningContext context);
-
-    /**
-     * Indicates whether this storage is currently in a burning state.
-     * <p>
-     * This typically means whether the storage contains a non-zero {@link Burning}
-     * value
-     * that is presently active or being consumed/used for burning operations.
-     * Implementations
-     * should return true if they should be considered actively burning (e.g., a
-     * generator
-     * is currently producing energy from fuel), false otherwise.
-     * </p>
-     *
-     * @return true if this storage is actively burning, false if not
-     */
-    boolean isBurning();
-
-    /**
-     * Transfers {@link Burning} between two burning storages, and returns the
-     * amount that was successfully transferred.
-     *
-     * @param from        the source storage (may be null)
-     * @param to          the target storage (may be null)
-     * @param burning     the maximum burning that may be moved
-     * @param context     the {@link BurningContext} to use
-     * @param transaction the transaction this transfer is part of,
-     *                    or {@code null} if a transaction should be opened just for
-     *                    this transfer
-     * @return the amount of {@link Burning} that was successfully transferred
-     */
-    static Burning transfer(
-            @Nullable BurningStorage from, @Nullable BurningStorage to,
-            Burning burning, BurningContext context, @Nullable TransactionContext transaction) {
-        if (from != null && to != null) {
-            Burning extracted;
-            try (var test = Transaction.openNested(transaction)) {
-                extracted = from.extract(burning, context, test);
-            }
-            try (var actual = Transaction.openNested(transaction)) {
-                var inserted = to.insert(extracted, context, actual);
-                if (Objects.equal(inserted, from.extract(inserted, context, actual))) {
-                    actual.commit();
-                    return inserted;
-                }
-            }
+        @Override
+        public @Nullable Storage<FuelVariant> find(Level world, BlockPos pos,
+                @Nullable BlockState state, @Nullable BlockEntity blockEntity, @Nullable Direction context) {
+            return GUARD.get().apply(this.lookup).find(world, pos, state, blockEntity, context);
         }
-        return burning.zero();
+
+        @Override
+        public void registerSelf(BlockEntityType<?>... blockEntityTypes) {
+            this.lookup.registerSelf(blockEntityTypes);
+        }
+
+        @Override
+        public void registerForBlocks(
+                BlockApiProvider<Storage<FuelVariant>, @Nullable Direction> provider,
+                Block... blocks) {
+            this.lookup.registerForBlocks(provider, blocks);
+        }
+
+        @Override
+        public void registerForBlockEntities(
+                BlockEntityApiProvider<Storage<FuelVariant>, @Nullable Direction> provider,
+                BlockEntityType<?>... blockEntityTypes) {
+            this.lookup.registerForBlockEntities(provider, blockEntityTypes);
+        }
+
+        @Override
+        public void registerFallback(
+                BlockApiProvider<Storage<FuelVariant>, @Nullable Direction> fallbackProvider) {
+            this.lookup.registerFallback(fallbackProvider);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return this.lookup.getId();
+        }
+
+        @Override
+        public Class<Storage<FuelVariant>> apiClass() {
+            return this.lookup.apiClass();
+        }
+
+        @Override
+        public Class<@Nullable Direction> contextClass() {
+            return this.lookup.contextClass();
+        }
+
+        @Override
+        public @Nullable BlockApiProvider<Storage<FuelVariant>, @Nullable Direction> getProvider(Block block) {
+            return this.lookup.getProvider(block);
+        }
     }
 }

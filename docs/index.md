@@ -78,6 +78,32 @@ Where a file like `strange_mod:strange_furnace_type` will look something like:
 ```
 To know the two fields names, you have to read the "Strange Mod" source code or ask one of its human maintainers.
 
+## Getting Started
+
+To get started on developing a mod using this library, add the following to your `build.gradle` file:
+
+```gradle
+repositories {
+    // Add Modrinth maven repository
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
+dependencies {
+    // Add Burning dependency
+    modImplementation "maven.modrinth:burning:<burning_version>"
+}
+```
+
 ## Project Overview
 
 Do refer to the javadoc for a more comprehensive documentation.

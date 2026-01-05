@@ -7,7 +7,7 @@
     "environment": "*",
     "entrypoints": {
         "fabric-gametest": [
-            "niv.burning.PropagatorGameTest",
+            "niv.burning.RecursiveInsertGameTest",
             "niv.burning.VanillaBurningStorageGameTest"
         ]
     }

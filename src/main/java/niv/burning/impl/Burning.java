@@ -8,16 +8,15 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.core.Registry;
 import niv.burning.api.BurningStorage;
-import niv.burning.api.base.BurningStorageBlockEntity;
 
 @Internal
-public final class BurningImpl {
+public final class Burning {
 
-    static final String MOD_ID;
+    public static final String MOD_ID;
 
-    static final String MOD_NAME;
+    public static final String MOD_NAME;
 
-    static final Logger LOGGER;
+    public static final Logger LOGGER;
 
     static {
         MOD_ID = "burning";
@@ -27,33 +26,19 @@ public final class BurningImpl {
         /*
          * Register a dynamic registry for DynamicBurningStorageProvider.
          */
-        DynamicRegistries.register(DynamicBurningStorageProvider.REGISTRY, DynamicBurningStorageProvider.CODEC);
-
-        /*
-         * Register fallback for block entities implementing the
-         * BurningStorageBlockEntity interface.
-         *
-         * Note: AbstractFurnaceBlockEntity implements BurningStorageBlockEntity.
-         */
-        BurningStorage.SIDED.registerFallback((level, pos, state, entity, side) -> {
-            if (entity instanceof BurningStorageBlockEntity instance) {
-                return instance.getBurningStorage(side);
-            } else {
-                return null;
-            }
-        });
+        DynamicRegistries.register(DynamicFurnaceStorageProvider.REGISTRY, DynamicFurnaceStorageProvider.CODEC);
 
         /*
          * Register as providers all loaded DynamicBurningStorageProviders.
          */
         ServerLifecycleEvents.SERVER_STARTING.register(server -> server.registryAccess()
-                .registry(DynamicBurningStorageProvider.REGISTRY).stream()
+                .registry(DynamicFurnaceStorageProvider.REGISTRY).stream()
                 .flatMap(Registry::stream)
                 .forEach(provider -> BurningStorage.SIDED
                         .registerForBlockEntity(provider::getBurningStorage, provider.type)));
     }
 
-    private BurningImpl() {
+    private Burning() {
     }
 
     public static final void initialize() {
