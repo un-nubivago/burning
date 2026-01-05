@@ -1,5 +1,7 @@
 package niv.burning.impl;
 
+import static java.lang.Math.clamp;
+
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.spongepowered.include.com.google.common.base.Preconditions;
 
@@ -30,7 +32,7 @@ public class DefaultFurnaceStorage extends AbstractFurnaceStorage {
     @Override
     protected void setAmount(long amount) {
         var capacity = getCapacity();
-        this.target.litTimeRemaining = Math.clamp(capacity == 0
+        this.target.litTimeRemaining = clamp(capacity == 0
                 ? amount
                 : amount * this.target.litTotalTime / capacity,
                 0, Integer.MAX_VALUE);

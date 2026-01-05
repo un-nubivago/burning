@@ -1,5 +1,7 @@
 package niv.burning.api.base;
 
+import static java.lang.Math.clamp;
+
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -78,7 +80,7 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
         var oldCapacity = getCapacity();
         var newCapacity = resource.getDuration();
         var oldAmount = getAmount();
-        var newAmount = Math.clamp(oldAmount + maxAmount, 0, Math.max(oldCapacity, newCapacity));
+        var newAmount = clamp(oldAmount + maxAmount, 0, Math.max(oldCapacity, newCapacity));
         if (newAmount <= oldAmount)
             return 0L;
 
@@ -102,7 +104,7 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
         var oldCapacity = getCapacity();
         var newCapacity = resource.getDuration();
         var oldAmount = getAmount();
-        var newAmount = Math.clamp(oldAmount - maxAmount, 0, Math.max(oldCapacity, newCapacity));
+        var newAmount = clamp(oldAmount - maxAmount, 0, Math.max(oldCapacity, newCapacity));
         if (newAmount >= oldAmount)
             return 0L;
 

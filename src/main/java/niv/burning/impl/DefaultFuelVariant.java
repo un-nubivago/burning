@@ -1,7 +1,5 @@
 package niv.burning.impl;
 
-import static niv.burning.impl.Burning.fuelValues;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +33,7 @@ public class DefaultFuelVariant implements FuelVariant {
 
     @Override
     public int getDuration() {
-        return fuelValues().burnDuration(new ItemStack(fuel));
+        return Burning.fuelValues().burnDuration(new ItemStack(fuel));
     }
 
     @Override
@@ -56,7 +54,7 @@ public class DefaultFuelVariant implements FuelVariant {
 
     public static @Nullable FuelVariant of(Item item) {
         Preconditions.checkNotNull(item, "Item may not be null.");
-        return fuelValues().isFuel(new ItemStack(item))
+        return Burning.fuelValues().isFuel(new ItemStack(item))
                 ? INTERN.computeIfAbsent(item, DefaultFuelVariant::new)
                 : FuelVariant.BLANK;
     }

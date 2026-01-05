@@ -38,9 +38,8 @@ public class RecursiveInsertGameTest {
         game.assertFalse(targetPos == null, literal("Target pos should not be null"));
 
         try (var transaction = Transaction.openOuter()) {
-            game.assertValueEqual(1200L,
-                    BurningStorageUtil.recursiveInsert(originPos, tx -> origin.insert(FuelVariant.COAL, 1600, tx),
-                            transaction),
+            game.assertValueEqual(1200L, BurningStorageUtil
+                    .recursiveInsert(originPos, tx -> origin.insert(FuelVariant.COAL, 1600, tx), transaction),
                     literal("inserted amount"));
             transaction.commit();
         }
