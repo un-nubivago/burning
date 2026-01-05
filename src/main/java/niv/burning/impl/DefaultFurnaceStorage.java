@@ -30,7 +30,7 @@ public class DefaultFurnaceStorage extends AbstractFurnaceStorage {
     @Override
     protected void setAmount(long amount) {
         var capacity = getCapacity();
-        this.target.litTime = (int) clamp(capacity == 0
+        this.target.litTime = clamp(capacity == 0
                 ? amount
                 : amount * this.target.litDuration / capacity,
                 0, Integer.MAX_VALUE);
@@ -67,12 +67,12 @@ public class DefaultFurnaceStorage extends AbstractFurnaceStorage {
         return new DefaultFurnaceStorage(entity);
     }
 
-    private static final long clamp(long amount, long min, long max) {
+    private static final int clamp(long amount, long min, long max) {
         if (amount < min)
-            return min;
+            return (int) min;
         else if (amount > max)
-            return max;
+            return (int) max;
         else
-            return amount;
+            return (int) amount;
     }
 }

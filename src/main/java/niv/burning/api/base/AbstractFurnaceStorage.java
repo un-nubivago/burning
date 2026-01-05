@@ -57,11 +57,11 @@ public abstract class AbstractFurnaceStorage extends SnapshotParticipant<Resourc
         setAmount(snapshot.amount());
     }
 
-    private static final long clamp(long amount, long min, long max) {
+    private static final int clamp(long amount, long min, long max) {
         if (amount < min)
-            return min;
+            return (int) min;
         else if (amount > max)
-            return max;
+            return (int) max;
         else
             return (int) amount;
     }
