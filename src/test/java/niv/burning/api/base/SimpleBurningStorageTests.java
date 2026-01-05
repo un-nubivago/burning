@@ -39,15 +39,15 @@ class SimpleBurningStorageTests {
 
     @Test
     void testInsertion() {
-        var storage = new SimpleBurningStorage(x -> x * 5 / 3);
+        var storage = new SimpleBurningStorage();
 
         // test cancelled insertion
         try (var transaction = Transaction.openOuter()) {
             assertEquals(1800, storage.insert(FuelVariant.of(Items.BLAZE_ROD), 1800, transaction));
 
             assertEquals(Items.BLAZE_ROD, storage.getResource().getFuel());
-            assertEquals(1800 * 5 / 3, storage.getAmount());
-            assertEquals(2400 * 5 / 3, storage.getCapacity());
+            assertEquals(1800, storage.getAmount());
+            assertEquals(2400, storage.getCapacity());
 
             assertFalse(storage.isResourceBlank());
             assertFalse(storage.getResource().isBlank());
@@ -66,23 +66,23 @@ class SimpleBurningStorageTests {
         }
 
         assertEquals(Items.BLAZE_ROD, storage.getResource().getFuel());
-        assertEquals(1800 * 5 / 3, storage.getAmount());
-        assertEquals(2400 * 5 / 3, storage.getCapacity());
+        assertEquals(1800, storage.getAmount());
+        assertEquals(2400, storage.getCapacity());
 
         assertFalse(storage.isResourceBlank());
         assertFalse(storage.getResource().isBlank());
 
         // test insertion into full
         storage.variant = FuelVariant.BLAZE_ROD;
-        storage.amount = 2400 * 5 / 3;
+        storage.amount = 2400;
         try (var transaction = Transaction.openOuter()) {
             assertEquals(0, storage.insert(FuelVariant.of(Items.BLAZE_ROD), 1200, transaction));
             transaction.commit();
         }
 
         assertEquals(Items.BLAZE_ROD, storage.getResource().getFuel());
-        assertEquals(2400 * 5 / 3, storage.getAmount());
-        assertEquals(2400 * 5 / 3, storage.getCapacity());
+        assertEquals(2400, storage.getAmount());
+        assertEquals(2400, storage.getCapacity());
 
         assertFalse(storage.isResourceBlank());
         assertFalse(storage.getResource().isBlank());
@@ -133,24 +133,24 @@ class SimpleBurningStorageTests {
 
     @Test
     void testExtraction() {
-        var storage = new SimpleBurningStorage(x -> x * 5 / 3);
+        var storage = new SimpleBurningStorage();
         storage.variant = FuelVariant.BLAZE_ROD;
-        storage.amount = 1800 * 5 / 3;
+        storage.amount = 1800;
 
         // test cancelled extraction
         try (var transaction = Transaction.openOuter()) {
             assertEquals(1200, storage.extract(FuelVariant.of(Items.BLAZE_ROD), 1200, transaction));
 
             assertEquals(Items.BLAZE_ROD, storage.getResource().getFuel());
-            assertEquals(600 * 5 / 3, storage.getAmount());
-            assertEquals(2400 * 5 / 3, storage.getCapacity());
+            assertEquals(600, storage.getAmount());
+            assertEquals(2400, storage.getCapacity());
 
             assertFalse(storage.isResourceBlank());
             assertFalse(storage.getResource().isBlank());
         }
         assertEquals(Items.BLAZE_ROD, storage.getResource().getFuel());
-        assertEquals(1800 * 5 / 3, storage.getAmount());
-        assertEquals(2400 * 5 / 3, storage.getCapacity());
+        assertEquals(1800, storage.getAmount());
+        assertEquals(2400, storage.getCapacity());
 
         assertFalse(storage.isResourceBlank());
         assertFalse(storage.getResource().isBlank());
@@ -162,8 +162,8 @@ class SimpleBurningStorageTests {
         }
 
         assertEquals(Items.BLAZE_ROD, storage.getResource().getFuel());
-        assertEquals(600 * 5 / 3, storage.getAmount());
-        assertEquals(2400 * 5 / 3, storage.getCapacity());
+        assertEquals(600, storage.getAmount());
+        assertEquals(2400, storage.getCapacity());
 
         assertFalse(storage.isResourceBlank());
         assertFalse(storage.getResource().isBlank());

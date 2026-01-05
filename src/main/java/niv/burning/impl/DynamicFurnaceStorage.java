@@ -3,7 +3,6 @@ package niv.burning.impl;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.FuelVariant;
@@ -27,14 +26,9 @@ public class DynamicFurnaceStorage extends AbstractFurnaceStorage {
     // AbstractFurnaceStorage
 
     @Override
-    protected long getCapacity(FuelVariant variant) {
-        return Burning.fuelValues().burnDuration(new ItemStack(variant.getFuel()));
-    }
-
-    @Override
     protected void setResource(FuelVariant resource) {
         this.fuel = resource.getFuel();
-        this.provider.litDuration.set(this.target, .0 + getCapacity(resource));
+        this.provider.litDuration.set(this.target, .0 + getCapacity());
 
     }
 
@@ -53,11 +47,6 @@ public class DynamicFurnaceStorage extends AbstractFurnaceStorage {
     @Override
     public long getAmount() {
         return this.provider.litTime.get(target).longValue();
-    }
-
-    @Override
-    public long getCapacity() {
-        return this.provider.litDuration.get(target).longValue();
     }
 
     // SnapshotParticipant

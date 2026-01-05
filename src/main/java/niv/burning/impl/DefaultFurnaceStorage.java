@@ -22,19 +22,18 @@ public class DefaultFurnaceStorage extends AbstractFurnaceStorage {
     // AbstractFurnaceStorage
 
     @Override
-    protected long getCapacity(FuelVariant variant) {
-        return this.target.getBurnDuration(Burning.fuelValues(), new ItemStack(variant.getFuel()));
-    }
-
-    @Override
     protected void setResource(FuelVariant resource) {
         this.target.setInternalBurningFuel(resource.getFuel());
-        this.target.litTotalTime = Math.clamp(getCapacity(resource), 0, Integer.MAX_VALUE);
+        this.target.litTotalTime = this.target.getBurnDuration(Burning.fuelValues(), new ItemStack(resource.getFuel()));
     }
 
     @Override
     protected void setAmount(long amount) {
-        this.target.litTimeRemaining = Math.clamp(amount, 0, Integer.MAX_VALUE);
+        var capacity = getCapacity();
+        this.target.litTimeRemaining = Math.clamp(capacity == 0
+                ? amount
+                : amount * this.target.litTotalTime / capacity,
+                0, Integer.MAX_VALUE);
     }
 
     // FurnaceStorage
@@ -46,12 +45,9 @@ public class DefaultFurnaceStorage extends AbstractFurnaceStorage {
 
     @Override
     public long getAmount() {
-        return this.target.litTimeRemaining;
-    }
-
-    @Override
-    public long getCapacity() {
-        return this.target.litTotalTime;
+        return this.target.litTotalTime == 0
+                ? this.target.litTimeRemaining
+                : this.target.litTimeRemaining * getCapacity() / this.target.litTotalTime;
     }
 
     // SnapshotParticipant

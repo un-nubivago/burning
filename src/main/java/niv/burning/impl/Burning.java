@@ -20,11 +20,11 @@ import niv.burning.api.BurningStorage;
 @Internal
 public final class Burning {
 
-    static final String MOD_ID;
+    public static final String MOD_ID;
 
-    static final String MOD_NAME;
+    public static final String MOD_NAME;
 
-    static final Logger LOGGER;
+    public static final Logger LOGGER;
 
     static Supplier<FuelValues> fuelValuesGetter;
 

@@ -9,8 +9,6 @@ import niv.burning.api.FurnaceStorage;
 
 public abstract class AbstractFurnaceStorage extends SnapshotParticipant<ResourceAmount<FuelVariant>> implements FurnaceStorage {
 
-    protected abstract long getCapacity(FuelVariant resource);
-
     protected abstract void setResource(FuelVariant resource);
 
     protected abstract void setAmount(long amount);
@@ -25,10 +23,9 @@ public abstract class AbstractFurnaceStorage extends SnapshotParticipant<Resourc
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
         var oldCapacity = getCapacity();
-        var newCapacity = getCapacity(resource);
+        var newCapacity = resource.getDuration();
         var oldAmount = getAmount();
-        var newAmount = Math.clamp(oldAmount + (maxAmount * newCapacity / resource.getDuration()),
-                0, Math.max(oldCapacity, newCapacity));
+        var newAmount = Math.clamp(oldAmount + maxAmount, 0, Math.max(oldCapacity, newCapacity));
         if (newAmount <= oldAmount)
             return 0L;
 
@@ -41,12 +38,12 @@ public abstract class AbstractFurnaceStorage extends SnapshotParticipant<Resourc
         if (getAmount() <= 0)
             setResource(FuelVariant.BLANK);
 
-        return (newAmount - oldAmount) * resource.getDuration() / newCapacity;
+        return newAmount - oldAmount;
     }
 
     @Override
     public long getCapacity() {
-        return getCapacity(getResource());
+        return getResource().getDuration();
     }
 
     @Override

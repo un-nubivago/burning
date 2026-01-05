@@ -1,9 +1,5 @@
 package niv.burning.api.base;
 
-import java.util.function.IntUnaryOperator;
-
-import org.jetbrains.annotations.Nullable;
-
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -53,22 +49,10 @@ import niv.burning.api.FuelVariant;
  */
 public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
 
-    protected final IntUnaryOperator operator;
-
     /**
      * Class constructor.
      */
     public SimpleBurningStorage() {
-        this(null);
-    }
-
-    /**
-     * Class constructor with custom burn duration operator.
-     *
-     * @param operator operator to apply to every obtained burn duration
-     */
-    public SimpleBurningStorage(@Nullable IntUnaryOperator operator) {
-        this.operator = operator == null ? IntUnaryOperator.identity() : operator;
         this.variant = FuelVariant.BLANK;
         this.amount = 0L;
     }
@@ -82,7 +66,7 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
 
     @Override
     protected long getCapacity(FuelVariant variant) {
-        return this.operator.applyAsInt(variant.getDuration());
+        return variant.getDuration();
     }
 
     // SingleSlotStorage
@@ -92,10 +76,9 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
         var oldCapacity = getCapacity();
-        var newCapacity = this.operator.applyAsInt(resource.getDuration());
+        var newCapacity = resource.getDuration();
         var oldAmount = getAmount();
-        var newAmount = Math.clamp(oldAmount + (maxAmount * newCapacity / resource.getDuration()),
-                0, Math.max(oldCapacity, newCapacity));
+        var newAmount = Math.clamp(oldAmount + maxAmount, 0, Math.max(oldCapacity, newCapacity));
         if (newAmount <= oldAmount)
             return 0L;
 
@@ -117,10 +100,9 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
         var oldCapacity = getCapacity();
-        var newCapacity = this.operator.applyAsInt(resource.getDuration());
+        var newCapacity = resource.getDuration();
         var oldAmount = getAmount();
-        var newAmount = Math.clamp(oldAmount - (maxAmount * newCapacity / resource.getDuration()),
-                0, Math.max(oldCapacity, newCapacity));
+        var newAmount = Math.clamp(oldAmount - maxAmount, 0, Math.max(oldCapacity, newCapacity));
         if (newAmount >= oldAmount)
             return 0L;
 
