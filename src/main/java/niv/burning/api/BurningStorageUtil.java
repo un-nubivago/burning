@@ -2,7 +2,6 @@ package niv.burning.api;
 
 import java.util.ArrayList;
 import java.util.PriorityQueue;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 
@@ -22,23 +21,9 @@ public class BurningStorageUtil {
     private BurningStorageUtil() {
     }
 
-    static final Function<BiConsumer<BlockPos, ToLongFunction<TransactionContext>>, Function<BlockApiLookup<Storage<FuelVariant>, Direction>, BlockApiProvider<Storage<FuelVariant>, Direction>>> INSERTION_PROXY_BUILDER;
-
-    static {
-        INSERTION_PROXY_BUILDER = consumer -> lookup -> (world, pos, state, entity, side) -> {
-            var storage = lookup.find(world, pos, state, entity, side);
-            return storage == null ? null : new InsertionOnlyStorage<FuelVariant>() {
-                @Override
-                public long insert(FuelVariant variant, long amount, TransactionContext any) {
-                    consumer.accept(pos, tx -> storage.insert(variant, amount, tx));
-                    return 0L;
-                }
-            };
-        };
-    }
-
     public static final long recursiveInsert(
             BlockPos originPos, ToLongFunction<TransactionContext> origin, TransactionContext transaction) {
+        Function<BlockApiLookup<Storage<FuelVariant>, Direction>, BlockApiProvider<Storage<FuelVariant>, Direction>> proxy;
 
         var open = new PriorityQueue<LongObjectPair<Pair<BlockPos, ToLongFunction<TransactionContext>>>>(
                 (a, b) -> Long.compare(a.keyLong(), b.keyLong()));
@@ -48,7 +33,16 @@ public class BurningStorageUtil {
 
         var closed = new Object2LongOpenHashMap<BlockPos>();
 
-        var proxy = INSERTION_PROXY_BUILDER.apply((pos, fn) -> candidates.add(Pair.of(pos, fn)));
+        proxy = lookup -> (world, pos, state, entity, side) -> {
+            var storage = lookup.find(world, pos, state, entity, side);
+            return storage == null ? null : new InsertionOnlyStorage<FuelVariant>() {
+                @Override
+                public long insert(FuelVariant variant, long amount, TransactionContext any) {
+                    candidates.add(Pair.of(pos, tx -> storage.insert(variant, amount, tx)));
+                    return 0L;
+                }
+            };
+        };
 
         var inserted = 0L;
         var max = 0L;
