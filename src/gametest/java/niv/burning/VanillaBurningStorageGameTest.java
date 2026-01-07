@@ -5,6 +5,7 @@ import static net.minecraft.network.chat.Component.literal;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -15,7 +16,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import niv.burning.api.BurningStorage;
 import niv.burning.api.FuelVariant;
-import niv.burning.api.FurnaceStorage;
 
 public class VanillaBurningStorageGameTest {
 
@@ -45,7 +45,7 @@ public class VanillaBurningStorageGameTest {
 
     private void runCommonSequence(GameTestHelper game, Item material, int speed) {
 
-        var storage = (FurnaceStorage) BurningStorage.SIDED.find(game.getLevel(), game.absolutePos(POS), null);
+        var storage = (SingleSlotStorage<FuelVariant>) BurningStorage.SIDED.find(game.getLevel(), game.absolutePos(POS), null);
         game.assertFalse(storage == null, literal("BurningStorage not found, it should have"));
 
         game.runAtTickTime(1, () -> {

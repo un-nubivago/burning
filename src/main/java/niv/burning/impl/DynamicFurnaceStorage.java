@@ -1,25 +1,19 @@
 package niv.burning.impl;
 
-import org.jetbrains.annotations.ApiStatus.Internal;
-
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.FuelVariant;
-import niv.burning.api.base.BurningStorageBlockEntity;
 
-@Internal
-class DynamicFurnaceStorage extends AbstractFurnaceStorage {
+final class DynamicFurnaceStorage extends AbstractFurnaceStorage<BlockEntity> {
 
     private final DynamicFurnaceStorageProvider provider;
-
-    private final BlockEntity target;
 
     private Item fuel = Items.AIR;
 
     DynamicFurnaceStorage(DynamicFurnaceStorageProvider provider, BlockEntity target) {
+        super(target);
         this.provider = provider;
-        this.target = target;
     }
 
     // AbstractFurnaceStorage
@@ -46,15 +40,5 @@ class DynamicFurnaceStorage extends AbstractFurnaceStorage {
     @Override
     public long getAmount() {
         return this.provider.litTime.get(target).longValue();
-    }
-
-    // SnapshotParticipant
-
-    @Override
-    protected void onFinalCommit() {
-        if (this.target.hasLevel()) {
-            BurningStorageBlockEntity.tryUpdateLitProperty(this.target, getAmount() > 0);
-            this.target.setChanged();
-        }
     }
 }

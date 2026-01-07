@@ -3,21 +3,16 @@ package niv.burning.impl;
 import static java.lang.Math.clamp;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
-import org.spongepowered.include.com.google.common.base.Preconditions;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import niv.burning.api.FuelVariant;
-import niv.burning.api.FurnaceStorage;
-import niv.burning.api.base.BurningStorageBlockEntity;
 
 @Internal
-public class DefaultFurnaceStorage extends AbstractFurnaceStorage {
+public final class DefaultFurnaceStorage extends AbstractFurnaceStorage<AbstractFurnaceBlockEntity> {
 
-    private final AbstractFurnaceBlockEntity target;
-
-    DefaultFurnaceStorage(AbstractFurnaceBlockEntity target) {
-        this.target = target;
+    public DefaultFurnaceStorage(AbstractFurnaceBlockEntity target) {
+        super(target);
     }
 
     // AbstractFurnaceStorage
@@ -49,22 +44,5 @@ public class DefaultFurnaceStorage extends AbstractFurnaceStorage {
         return this.target.litTotalTime == 0
                 ? this.target.litTimeRemaining
                 : this.target.litTimeRemaining * getCapacity() / this.target.litTotalTime;
-    }
-
-    // SnapshotParticipant
-
-    @Override
-    protected void onFinalCommit() {
-        if (this.target.hasLevel()) {
-            BurningStorageBlockEntity.tryUpdateLitProperty(this.target, getAmount() > 0);
-            this.target.setChanged();
-        }
-    }
-
-    // static
-
-    public static final FurnaceStorage of(AbstractFurnaceBlockEntity entity) {
-        Preconditions.checkNotNull(entity, "Entity may not be null.");
-        return new DefaultFurnaceStorage(entity);
     }
 }

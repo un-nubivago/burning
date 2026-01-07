@@ -13,7 +13,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Items;
 import niv.burning.api.FuelVariant;
-import niv.burning.api.FurnaceStorage;
 
 class DynamicFurnaceStorageTests {
 
@@ -24,7 +23,7 @@ class DynamicFurnaceStorageTests {
         CommonUtils.initialize();
     }
 
-    private FurnaceStorage newInstance() {
+    private DynamicFurnaceStorage newInstance() {
         return CommonUtils.newDynamicFurnace();
     }
 

@@ -18,7 +18,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import niv.burning.api.FurnaceStorage;
 
 final class DynamicFurnaceStorageProvider {
 
@@ -44,7 +43,7 @@ final class DynamicFurnaceStorageProvider {
         this.litDuration = litDuration;
     }
 
-    public @Nullable FurnaceStorage getBurningStorage(BlockEntity entity, @Nullable Direction side) {
+    public @Nullable DynamicFurnaceStorage getBurningStorage(BlockEntity entity, @Nullable Direction side) {
         return new DynamicFurnaceStorage(this, entity);
     }
 

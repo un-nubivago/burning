@@ -16,7 +16,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import niv.burning.api.FuelVariant;
-import niv.burning.api.FurnaceStorage;
 
 class DefaultFurnaceStorageTests {
 
@@ -27,8 +26,8 @@ class DefaultFurnaceStorageTests {
         CommonUtils.initialize();
     }
 
-    private FurnaceStorage newInstance() {
-        return DefaultFurnaceStorage.of(new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState()));
+    private DefaultFurnaceStorage newInstance() {
+        return new DefaultFurnaceStorage(new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState()));
     }
 
     @Test

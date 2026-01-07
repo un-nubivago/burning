@@ -19,8 +19,8 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.BurningTags;
 import niv.burning.api.FuelVariant;
-import niv.burning.api.FurnaceStorage;
 import niv.burning.impl.AbstractFurnaceBlockEntityExtension;
+import niv.burning.impl.DefaultFurnaceStorage;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExtension {
@@ -55,7 +55,7 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
         if (((BlockEntity) (Object) this).getBlockState().is(BurningTags.BLACKLIST))
             return null;
         if (this.internalBurningStorage == null)
-            this.internalBurningStorage = FurnaceStorage.of(((AbstractFurnaceBlockEntity) (Object) this));
+            this.internalBurningStorage = new DefaultFurnaceStorage(((AbstractFurnaceBlockEntity) (Object) this));
         return this.internalBurningStorage;
     }
 
