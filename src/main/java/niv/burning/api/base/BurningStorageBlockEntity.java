@@ -39,13 +39,12 @@ public interface BurningStorageBlockEntity {
     }
 
     /**
-     * Tries to update the {@link BlockStateProperties#LIT LIT} property of the
-     * given {@code entity} to match the {@link OldBurningStorage#isBurning() burning}
-     * status of the given {@code storage}.
+     * Tries to update the {@link BlockStateProperties#LIT LIT} property of
+     * {@code entity} to match {@code isBurning}.
      *
-     * @param entity  the block entity
-     * @param storage the burning storage
-     * @return true if the LIT property has changed; false otherwise
+     * @param entity  a non-null block entity
+     * @param isBurning a boolean indicating wether entity is burning fuel
+     * @return true if manages to change the LIT property; false otherwise
      */
     static boolean tryUpdateLitProperty(BlockEntity entity, boolean isBurning) {
         var level = entity.level;
