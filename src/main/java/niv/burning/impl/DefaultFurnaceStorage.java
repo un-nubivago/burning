@@ -9,7 +9,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import niv.burning.api.FuelVariant;
 import niv.burning.api.FurnaceStorage;
-import niv.burning.api.base.AbstractFurnaceStorage;
 import niv.burning.api.base.BurningStorageBlockEntity;
 
 @Internal

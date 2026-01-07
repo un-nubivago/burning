@@ -6,11 +6,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.FuelVariant;
-import niv.burning.api.base.AbstractFurnaceStorage;
 import niv.burning.api.base.BurningStorageBlockEntity;
 
 @Internal
-public class DynamicFurnaceStorage extends AbstractFurnaceStorage {
+class DynamicFurnaceStorage extends AbstractFurnaceStorage {
 
     private final DynamicFurnaceStorageProvider provider;
 

@@ -1,4 +1,4 @@
-package niv.burning.api.base;
+package niv.burning.impl;
 
 import static java.lang.Math.clamp;
 
@@ -9,7 +9,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import niv.burning.api.FuelVariant;
 import niv.burning.api.FurnaceStorage;
 
-public abstract class AbstractFurnaceStorage extends SnapshotParticipant<ResourceAmount<FuelVariant>> implements FurnaceStorage {
+abstract class AbstractFurnaceStorage extends SnapshotParticipant<ResourceAmount<FuelVariant>> implements FurnaceStorage {
 
     protected abstract void setResource(FuelVariant resource);
 

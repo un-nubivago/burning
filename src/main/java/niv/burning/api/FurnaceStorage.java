@@ -1,5 +1,6 @@
 package niv.burning.api;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,6 +41,6 @@ public interface FurnaceStorage extends SingleSlotStorage<FuelVariant>, Insertio
 
     @Override
     default Iterator<StorageView<FuelVariant>> iterator() {
-        return InsertionOnlyStorage.super.iterator();
+        return Collections.emptyIterator();
     }
 }
