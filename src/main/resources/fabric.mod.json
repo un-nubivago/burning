@@ -9,15 +9,12 @@
     ],
     "contact": {
         "homepage": "https://modrinth.com/mod/burning",
-        "sources": "https://github.com/NivOridocs/burning"
+        "sources": "https://github.com/un-nubivago/burning"
     },
     "custom": {
         "loom:injected_interfaces": {
             "net/minecraft/class_2609": [
                 "niv/burning/impl/AbstractFurnaceBlockEntityExtension"
-            ],
-            "net/minecraft/class_9895": [
-                "niv/burning/api/BurningContext"
             ]
         }
     },
@@ -26,7 +23,7 @@
     "environment": "*",
     "entrypoints": {
         "main": [
-            "niv.burning.impl.BurningImpl::initialize"
+            "niv.burning.impl.Burning::initialize"
         ]
     },
     "accessWidener": "burning.accessWidener",
