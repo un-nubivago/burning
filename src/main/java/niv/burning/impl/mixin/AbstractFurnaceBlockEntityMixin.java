@@ -10,15 +10,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.sugar.Local;
 
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import niv.burning.api.BurningStorage;
 import niv.burning.api.BurningTags;
-import niv.burning.api.base.FurnaceBurningStorage;
+import niv.burning.api.FuelVariant;
 import niv.burning.impl.AbstractFurnaceBlockEntityExtension;
+import niv.burning.impl.DefaultFurnaceStorage;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExtension {
@@ -31,11 +33,10 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
     private static final String SERVER_LEVEL = "Lnet/minecraft/server/level/ServerLevel;";
 
     @Unique
-    private final BurningStorage internalBurningStorage = new FurnaceBurningStorage(
-            (AbstractFurnaceBlockEntity) (Object) this);
+    private Storage<FuelVariant> internalBurningStorage;
 
     @Unique
-    private Item internalLastBurnedFuel;
+    private Item internalLastBurnedFuel = Items.AIR;
 
     @Unique
     @Override
@@ -46,16 +47,16 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
     @Unique
     @Override
     public void setInternalBurningFuel(Item fuel) {
-        this.internalLastBurnedFuel = fuel;
+        this.internalLastBurnedFuel = fuel == null ? Items.AIR : fuel;
     }
 
     @Override
-    public @Nullable BurningStorage getBurningStorage(@Nullable Direction direction) {
-        if (((BlockEntity) (Object) this).getBlockState().is(BurningTags.BLACKLIST)) {
+    public @Nullable Storage<FuelVariant> getBurningStorage(@Nullable Direction direction) {
+        if (((BlockEntity) (Object) this).getBlockState().is(BurningTags.BLACKLIST))
             return null;
-        } else {
-            return this.internalBurningStorage;
-        }
+        if (this.internalBurningStorage == null)
+            this.internalBurningStorage = new DefaultFurnaceStorage(((AbstractFurnaceBlockEntity) (Object) this));
+        return this.internalBurningStorage;
     }
 
     @Inject( //
