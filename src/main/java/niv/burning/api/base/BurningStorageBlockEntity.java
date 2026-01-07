@@ -2,10 +2,11 @@ package niv.burning.api.base;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import niv.burning.api.BurningStorage;
+import niv.burning.api.FuelVariant;
 
 /**
  * <b>Optional</b> helper class that can be implemented on block entities that
@@ -33,20 +34,19 @@ public interface BurningStorageBlockEntity {
      * @param side The side of the storage to query, {@code null} means that the
      *             full storage without the restriction should be returned instead.
      */
-    default @Nullable BurningStorage getBurningStorage(@Nullable Direction direction) {
+    default @Nullable Storage<FuelVariant> getBurningStorage(@Nullable Direction direction) {
         return null;
     }
 
     /**
-     * Tries to update the {@link BlockStateProperties#LIT LIT} property of the
-     * given {@code entity} to match the {@link BurningStorage#isBurning() burning}
-     * status of the given {@code storage}.
+     * Tries to update the {@link BlockStateProperties#LIT LIT} property of
+     * {@code entity} to match {@code isBurning}.
      *
-     * @param entity  the block entity
-     * @param storage the burning storage
-     * @return true if the LIT property has changed; false otherwise
+     * @param entity  a non-null block entity
+     * @param isBurning a boolean indicating wether entity is burning fuel
+     * @return true if manages to change the LIT property; false otherwise
      */
-    static boolean tryUpdateLitProperty(BlockEntity entity, BurningStorage storage) {
+    static boolean tryUpdateLitProperty(BlockEntity entity, boolean isBurning) {
         var level = entity.level;
         var pos = entity.worldPosition;
         if (level == null || pos == null)
@@ -57,7 +57,6 @@ public interface BurningStorageBlockEntity {
         if (wasBurning == null)
             return false;
 
-        var isBurning = storage.isBurning();
         if (wasBurning.equals(isBurning))
             return false;
 

@@ -18,19 +18,18 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import niv.burning.api.BurningStorage;
 
-final class DynamicBurningStorageProvider {
+final class DynamicFurnaceStorageProvider {
 
-    public static final ResourceKey<Registry<DynamicBurningStorageProvider>> REGISTRY = ResourceKey
+    public static final ResourceKey<Registry<DynamicFurnaceStorageProvider>> REGISTRY = ResourceKey
             .createRegistryKey(ResourceLocation.tryParse("burning:dynamic_storage"));
 
-    public static final Codec<DynamicBurningStorageProvider> CODEC = RecordCodecBuilder.create(instance -> instance
+    public static final Codec<DynamicFurnaceStorageProvider> CODEC = RecordCodecBuilder.create(instance -> instance
             .group(
                     BuiltInRegistries.BLOCK_ENTITY_TYPE.byNameCodec().fieldOf("type").forGetter(src -> src.type),
                     Codec.STRING.fieldOf("lit_time").forGetter(src -> src.litTime.getName()),
                     Codec.STRING.fieldOf("lit_duration").forGetter(src -> src.litDuration.getName()))
-            .apply(instance, DynamicBurningStorageProvider::from));
+            .apply(instance, DynamicFurnaceStorageProvider::from));
 
     final BlockEntityType<?> type;
 
@@ -38,17 +37,17 @@ final class DynamicBurningStorageProvider {
 
     final DynamicField litDuration;
 
-    private DynamicBurningStorageProvider(BlockEntityType<?> type, DynamicField litTime, DynamicField litDuration) {
+    private DynamicFurnaceStorageProvider(BlockEntityType<?> type, DynamicField litTime, DynamicField litDuration) {
         this.type = type;
         this.litTime = litTime;
         this.litDuration = litDuration;
     }
 
-    public @Nullable BurningStorage getBurningStorage(BlockEntity entity, @Nullable Direction side) {
-        return new DynamicBurningStorage(this, entity);
+    public @Nullable DynamicFurnaceStorage getBurningStorage(BlockEntity entity, @Nullable Direction side) {
+        return new DynamicFurnaceStorage(this, entity);
     }
 
-    static final DynamicBurningStorageProvider from(BlockEntityType<?> type, String litTime, String litDuration) {
+    static final DynamicFurnaceStorageProvider from(BlockEntityType<?> type, String litTime, String litDuration) {
         Class<?> clazz = ((BlockEntityTypeAccessor) type).getBlocks()
                 .stream().findAny()
                 .map(Block::defaultBlockState)
@@ -64,7 +63,7 @@ final class DynamicBurningStorageProvider {
                     .flatMap(DynamicField::of);
 
             if (litTimeField.isPresent() && litDurationField.isPresent()) {
-                return new DynamicBurningStorageProvider(type, litTimeField.get(), litDurationField.get());
+                return new DynamicFurnaceStorageProvider(type, litTimeField.get(), litDurationField.get());
             }
         }
         return null;

@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Changed
+
++ Removed the custom `BurningStorage` block API in favour of `Storage<FuelVariant>`: something much more compatible with Fabric Transfer API.
+
+### Removed
+
++ Removed the `BurningPropagator` API and all the propagation logic.
++ Removed many of the `base` implementations made redundant by the newfound compatibility with Fabric Transfer API.
+
 ## [2.0] - 2025-12-24
 
 ### Changed
