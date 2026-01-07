@@ -1,4 +1,4 @@
-package niv.burning.api.base;
+package niv.burning.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.ResourceAmount;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import niv.burning.api.FuelVariant;
-import niv.burning.api.FurnaceStorage;
-import niv.burning.impl.DynamicFurnaceStorage;
-import niv.burning.impl.CommonUtils;
 
-class DynamicFurnaceStorageTests {
+class DefaultFurnaceStorageTests {
 
     @BeforeAll
     static void setup() {
@@ -26,8 +26,8 @@ class DynamicFurnaceStorageTests {
         CommonUtils.initialize();
     }
 
-    private FurnaceStorage newInstance() {
-        return CommonUtils.newDynamicFurnace();
+    private DefaultFurnaceStorage newInstance() {
+        return new DefaultFurnaceStorage(new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState()));
     }
 
     @Test
@@ -80,7 +80,7 @@ class DynamicFurnaceStorageTests {
         assertFalse(storage.getResource().isBlank());
 
         // test insertion into full
-        ((DynamicFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 2400));
+        ((DefaultFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 2400));
         try (var transaction = Transaction.openOuter()) {
             assertEquals(0, storage.insert(FuelVariant.of(Items.BLAZE_ROD), 1200, transaction));
             transaction.commit();
@@ -97,7 +97,7 @@ class DynamicFurnaceStorageTests {
     @Test
     void testOverInsertion() {
         var storage = newInstance();
-        ((DynamicFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 1800));
+        ((DefaultFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 1800));
 
         // test over-insertion with same variant
         try (var transaction = Transaction.openOuter()) {
@@ -139,7 +139,7 @@ class DynamicFurnaceStorageTests {
     @Test
     void testExtraction() {
         var storage = newInstance();
-        ((DynamicFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 1800));
+        ((DefaultFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 1800));
 
         // test unsupported extraction
         try (var transaction = Transaction.openOuter()) {
@@ -154,7 +154,7 @@ class DynamicFurnaceStorageTests {
         assertFalse(storage.getResource().isBlank());
 
         // test unsupported extraction from empty
-        ((DynamicFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 0));
+        ((DefaultFurnaceStorage) storage).readSnapshot(new ResourceAmount<>(FuelVariant.BLAZE_ROD, 0));
         try (var transaction = Transaction.openOuter()) {
             assertEquals(0, storage.extract(FuelVariant.of(Items.BLAZE_ROD), 1200, transaction));
             transaction.commit();

@@ -15,6 +15,7 @@ import niv.burning.api.FuelVariant;
  * public class MyBlockEntity extends BlockEntity {
  *   // Add a SimpleBurningStorage in the block entity class
  *   public final SimpleBurningStorage burningStorage = new SimpleBurningStorage() {
+ *      // Technically optional but highly advised: override the onFinalCommit to (at least) flag MyBlockEntity as changed
  *      {@literal @}Override
  *      <p>
  *      protected void onFinalCommit() {
@@ -24,11 +25,10 @@ import niv.burning.api.FuelVariant;
  *
  *   // Use the storage internally, for example in tick()
  *   public void tick() {
- *     BurningContext context = BurningContext.worldlyContext(this.level);
- *     if (!this.level.isClientSide && this.burningStorage.isBurning()) {
+ *     if (!this.level.isClientSide && this.burningStorage.getAmount() > 0) {
  *       try (Transaction transaction = Transaction.openOuter()) {
- *          Burning extracted = this.burningStorage.extract(Burning.COAL.withValue(200, context), context, transaction);
- *          // do something with burning just extracted
+ *          Burning extracted = this.burningStorage.extract(FuelVariant.COAL, 200, transaction);
+ *          // do something with amount just extracted
  *          transaction.commit();
  *       }
  *     }
@@ -92,7 +92,7 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
         if (this.amount <= 0)
             this.variant = FuelVariant.BLANK;
 
-        return (newAmount - oldAmount) * resource.getDuration() / newCapacity;
+        return newAmount - oldAmount;
     }
 
     @Override
@@ -115,7 +115,7 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
         if (this.amount <= 0)
             this.variant = FuelVariant.BLANK;
 
-        return (oldAmount - newAmount) * resource.getDuration() / newCapacity;
+        return oldAmount - newAmount;
     }
 
     private static final int clamp(long amount, long min, long max) {

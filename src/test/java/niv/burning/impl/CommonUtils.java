@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
-import niv.burning.api.FurnaceStorage;
 
 public class CommonUtils {
     private CommonUtils() {
@@ -24,7 +23,7 @@ public class CommonUtils {
 
     }
 
-    public static FurnaceStorage newDynamicFurnace() {
+    public static DynamicFurnaceStorage newDynamicFurnace() {
         return new DynamicFurnaceStorage(PROVIDER,
                 new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState()));
     }
