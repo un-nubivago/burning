@@ -109,7 +109,7 @@ public interface FuelVariant extends TransferVariant<Item> {
     @Override
     default CompoundTag toNbt() {
         var result = new CompoundTag();
-        result.putString("item", BuiltInRegistries.ITEM.getKey(getFuel()).toString());
+        result.putString("fuel", BuiltInRegistries.ITEM.getKey(getFuel()).toString());
         return result;
     }
 
