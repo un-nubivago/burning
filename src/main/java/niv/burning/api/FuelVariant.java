@@ -127,8 +127,7 @@ public interface FuelVariant extends TransferVariant<Item> {
         return false;
     }
 
-    @SuppressWarnings("deprecation")
     default Holder<Item> getRegistryEntry() {
-        return getFuel().builtInRegistryHolder();
+        return BuiltInRegistries.ITEM.wrapAsHolder(getFuel());
     }
 }
