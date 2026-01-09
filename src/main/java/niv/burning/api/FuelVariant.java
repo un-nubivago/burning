@@ -2,17 +2,16 @@ package niv.burning.api;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
+import niv.burning.impl.Burning;
 import niv.burning.impl.DefaultFuelVariant;
 
 /**
@@ -22,11 +21,6 @@ import niv.burning.impl.DefaultFuelVariant;
  * Do not implement, use the static {@code of(...)} functions instead.
  */
 public interface FuelVariant extends TransferVariant<Item> {
-
-    Codec<FuelVariant> CODEC = RecordCodecBuilder.create(instance -> instance
-            .group(
-                    BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("fuel").forGetter(FuelVariant::getRegistryEntry))
-            .apply(instance, DefaultFuelVariant::of));
 
     /**
      * Shortcut to {@code FuelVarian.of(Items.LAVA_BUCKET)}
@@ -123,8 +117,29 @@ public interface FuelVariant extends TransferVariant<Item> {
         }
     }
 
-    @SuppressWarnings("deprecation")
     default Holder<Item> getRegistryEntry() {
-        return getFuel().builtInRegistryHolder();
+        return BuiltInRegistries.ITEM.wrapAsHolder(getFuel());
+    }
+
+    /**
+     * Deserialize a variant from an NBT compound tag, assuming it was serialized
+     * using {@link #toNbt}. If an error occurs during deserialization, it will be
+     * logged with the DEBUG level, and a blank variant will be returned.
+     */
+    static FuelVariant fromNbt(CompoundTag compoundTag) {
+        try {
+            return of(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(compoundTag.getString("fuel"))));
+        } catch (RuntimeException rex) {
+            Burning.LOGGER.debug("Tried to load an invalid FuelVariant from NBT: {}", compoundTag, rex);
+            return BLANK;
+        }
+    }
+
+    /**
+     * Write a variant from a packet byte buffer, assuming it was serialized using
+     * {@link #toPacket}.
+     */
+    static FuelVariant fromPacket(FriendlyByteBuf buf) {
+        return buf.readBoolean() ? of(Item.byId(buf.readVarInt())) : BLANK;
     }
 }

@@ -3,6 +3,7 @@ package niv.burning.api.base;
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.nbt.CompoundTag;
 import niv.burning.api.FuelVariant;
 
 /**
@@ -116,6 +117,11 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
             this.variant = FuelVariant.BLANK;
 
         return oldAmount - newAmount;
+    }
+
+    public void readNbt(CompoundTag compoundTag) {
+        this.variant = FuelVariant.fromNbt(compoundTag);
+        this.amount = compoundTag.getLong("amount");
     }
 
     private static final int clamp(long amount, long min, long max) {
