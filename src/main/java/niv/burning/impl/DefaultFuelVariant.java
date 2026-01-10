@@ -40,8 +40,9 @@ public final class DefaultFuelVariant implements FuelVariant {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof DefaultFuelVariant that && this.hashCode == that.hashCode && this.fuel == that.fuel);
+        return this == other || (other instanceof DefaultFuelVariant that
+                && this.hashCode == that.hashCode
+                && this.fuel == that.fuel);
     }
 
     @Override
@@ -51,16 +52,12 @@ public final class DefaultFuelVariant implements FuelVariant {
 
     @Internal
     public static FuelVariant of(Item item) {
-        return Burning.fuelValues().isFuel(new ItemStack(item))
-                ? INTERN.computeIfAbsent(item, DefaultFuelVariant::new)
-                : FuelVariant.BLANK;
+        return isFuel(item) ? INTERN.computeIfAbsent(item, DefaultFuelVariant::new) : BLANK;
     }
 
     @Internal
     public static FuelVariant of(ItemStack stack) {
-        return Burning.fuelValues().isFuel(stack)
-                ? INTERN.computeIfAbsent(stack.getItem(), DefaultFuelVariant::new)
-                : FuelVariant.BLANK;
+        return isFuel(stack) ? INTERN.computeIfAbsent(stack.getItem(), DefaultFuelVariant::new) : BLANK;
     }
 
     @Internal
