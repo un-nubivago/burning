@@ -1,5 +1,7 @@
 package niv.burning.api;
 
+import static java.util.Objects.requireNonNull;
+
 import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
@@ -7,11 +9,10 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-import niv.burning.impl.Burning;
 import niv.burning.impl.DefaultFuelVariant;
 
 /**
@@ -72,17 +73,97 @@ public interface FuelVariant extends TransferVariant<Item> {
     }
 
     /**
-     * Retrieves a instance if {@code fuel} is actually a fuel.
+     * Retrieves a instance if {@code item} is actually a fuel.
      *
-     * @param fuel a non-null object
-     * @return a non-null, non-blank fuel varian if {@code fuel} is a fuel, {@link #BLANK} otherwise.
+     * @param item a non-null item
+     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK} otherwise.
      */
-    static FuelVariant of(ItemLike fuel) {
-        return DefaultFuelVariant.of(fuel);
+    static FuelVariant of(Item item) {
+        return DefaultFuelVariant.of(requireNonNull(item));
     }
 
+    /**
+     * Retrieves a instance if {@code item} is actually a fuel.
+     *
+     * @param item a non-null item
+     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK} otherwise.
+     */
+    static FuelVariant of(ItemLike item) {
+        return DefaultFuelVariant.of(requireNonNull(item).asItem());
+    }
+
+    /**
+     * Retrieves a instance if {@code stack} is actually a fuel.
+     *
+     * @param stack a non-null stack
+     * @return a non-blank instance if {@code stack} is a fuel, {@link #BLANK} otherwise.
+     */
+    static FuelVariant of(ItemStack stack) {
+        return DefaultFuelVariant.of(requireNonNull(stack));
+    }
+
+    /**
+     * Retrieves a instance if {@code item} is actually a fuel.
+     *
+     * @param item a non-null item
+     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK} otherwise.
+     */
+    static FuelVariant of(Holder<Item> item) {
+        return DefaultFuelVariant.of(requireNonNull(item).value());
+    }
+
+    /**
+     * Check wether {@code item} is a fuel.
+     *
+     * @param item a non-null item
+     * @return tru if {@code item} is a fuel, false otherwise
+     */
+    static boolean isFuel(Item item) {
+        return DefaultFuelVariant.isFuel(requireNonNull(item));
+    }
+
+    /**
+     * Check wether {@code item} is a fuel.
+     *
+     * @param item a non-null item
+     * @return tru if {@code item} is a fuel, false otherwise
+     */
+    static boolean isFuel(ItemLike item) {
+        return DefaultFuelVariant.isFuel(requireNonNull(item).asItem());
+    }
+
+    /**
+     * Check wether {@code stack} is a fuel.
+     *
+     * @param stack a non-null stack
+     * @return tru if {@code stack} is a fuel, false otherwise
+     */
+    static boolean isFuel(ItemStack stack) {
+        return DefaultFuelVariant.isFuel(requireNonNull(stack));
+    }
+
+    /**
+     * Check wether {@code item} is a fuel.
+     *
+     * @param item a non-null item
+     * @return tru if {@code item} is a fuel, false otherwise
+     */
+    static boolean isFuel(Holder<Item> item) {
+        return DefaultFuelVariant.isFuel(requireNonNull(item).value());
+    }
+
+    /**
+     * Return the immutable item instance of this variant.
+     *
+     * @return a non-null item instance
+     */
     Item getFuel();
 
+    /**
+     * Return the commutated burn duration of this variant.
+     *
+     * @return a non-negative integer
+     */
     int getDuration();
 
     @Override
@@ -127,12 +208,7 @@ public interface FuelVariant extends TransferVariant<Item> {
      * logged with the DEBUG level, and a blank variant will be returned.
      */
     static FuelVariant fromNbt(CompoundTag compoundTag) {
-        try {
-            return of(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(compoundTag.getString("fuel"))));
-        } catch (RuntimeException rex) {
-            Burning.LOGGER.debug("Tried to load an invalid FuelVariant from NBT: {}", compoundTag, rex);
-            return BLANK;
-        }
+        return DefaultFuelVariant.fromNbt(compoundTag);
     }
 
     /**
@@ -140,6 +216,6 @@ public interface FuelVariant extends TransferVariant<Item> {
      * {@link #toPacket}.
      */
     static FuelVariant fromPacket(FriendlyByteBuf buf) {
-        return buf.readBoolean() ? of(Item.byId(buf.readVarInt())) : BLANK;
+        return DefaultFuelVariant.fromPacket(buf);
     }
 }

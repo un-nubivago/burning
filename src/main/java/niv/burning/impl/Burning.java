@@ -12,11 +12,11 @@ import niv.burning.api.BurningStorage;
 @Internal
 public final class Burning {
 
-    public static final String MOD_ID;
+    static final String MOD_ID;
 
-    public static final String MOD_NAME;
+    static final String MOD_NAME;
 
-    public static final Logger LOGGER;
+    static final Logger LOGGER;
 
     static {
         MOD_ID = "burning";
