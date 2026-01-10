@@ -20,11 +20,11 @@ import niv.burning.api.BurningStorage;
 @Internal
 public final class Burning {
 
-    public static final String MOD_ID;
+    static final String MOD_ID;
 
-    public static final String MOD_NAME;
+    static final String MOD_NAME;
 
-    public static final Logger LOGGER;
+    static final Logger LOGGER;
 
     static Supplier<FuelValues> fuelValuesGetter;
 
@@ -55,6 +55,9 @@ public final class Burning {
                 .forEach(provider -> BurningStorage.SIDED
                         .registerForBlockEntity(provider::getBurningStorage, provider.type)));
 
+        /*
+         * Capture the server-scoped fuel values
+         */
         ServerLifecycleEvents.SERVER_STARTED.register(server -> fuelValuesGetter = server::fuelValues);
     }
 

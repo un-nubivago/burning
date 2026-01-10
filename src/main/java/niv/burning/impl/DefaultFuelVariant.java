@@ -4,24 +4,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
-import com.google.common.base.Preconditions;
-
-import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
 import niv.burning.api.FuelVariant;
 
-public class DefaultFuelVariant implements FuelVariant {
+@Internal
+public final class DefaultFuelVariant implements FuelVariant {
 
     private static final Map<Item, DefaultFuelVariant> INTERN = new ConcurrentHashMap<>();
 
     private final Item fuel;
     private final int hashCode;
 
-    protected DefaultFuelVariant(Item fuel) {
+    DefaultFuelVariant(Item fuel) {
         this.fuel = fuel;
         this.hashCode = Objects.hash(fuel);
     }
@@ -43,8 +40,9 @@ public class DefaultFuelVariant implements FuelVariant {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof DefaultFuelVariant that && this.hashCode == that.hashCode && this.fuel == that.fuel);
+        return this == other || (other instanceof DefaultFuelVariant that
+                && this.hashCode == that.hashCode
+                && this.fuel == that.fuel);
     }
 
     @Override
@@ -52,18 +50,23 @@ public class DefaultFuelVariant implements FuelVariant {
         return this.hashCode;
     }
 
-    public static @Nullable FuelVariant of(Item item) {
-        Preconditions.checkNotNull(item, "Item may not be null.");
-        return Burning.fuelValues().isFuel(new ItemStack(item))
-                ? INTERN.computeIfAbsent(item, DefaultFuelVariant::new)
-                : FuelVariant.BLANK;
+    @Internal
+    public static FuelVariant of(Item item) {
+        return isFuel(item) ? INTERN.computeIfAbsent(item, DefaultFuelVariant::new) : BLANK;
     }
 
-    public static FuelVariant of(ItemLike item) {
-        return of(item.asItem());
+    @Internal
+    public static FuelVariant of(ItemStack stack) {
+        return isFuel(stack) ? INTERN.computeIfAbsent(stack.getItem(), DefaultFuelVariant::new) : BLANK;
     }
 
-    public static FuelVariant of(Holder<Item> item) {
-        return of(item.value());
+    @Internal
+    public static boolean isFuel(Item item) {
+        return Burning.fuelValues().isFuel(new ItemStack(item));
+    }
+
+    @Internal
+    public static boolean isFuel(ItemStack stack) {
+        return Burning.fuelValues().isFuel(stack);
     }
 }

@@ -1,5 +1,7 @@
 package niv.burning.api;
 
+import static java.util.Objects.requireNonNull;
+
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -13,6 +15,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import niv.burning.impl.DefaultFuelVariant;
@@ -28,11 +31,11 @@ public interface FuelVariant extends TransferVariant<Item> {
     Codec<FuelVariant> CODEC = RecordCodecBuilder.create(instance -> instance
             .group(
                     BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("fuel").forGetter(FuelVariant::getRegistryEntry))
-            .apply(instance, DefaultFuelVariant::of));
+            .apply(instance, FuelVariant::of));
 
     StreamCodec<RegistryFriendlyByteBuf, FuelVariant> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.holderRegistry(Registries.ITEM), FuelVariant::getRegistryEntry,
-            DefaultFuelVariant::of);
+            FuelVariant::of);
 
     /**
      * Shortcut to {@code FuelVarian.of(Items.LAVA_BUCKET)}
@@ -84,17 +87,97 @@ public interface FuelVariant extends TransferVariant<Item> {
     }
 
     /**
-     * Retrieves a instance if {@code fuel} is actually a fuel.
+     * Retrieves a instance if {@code item} is actually a fuel.
      *
-     * @param fuel a non-null object
-     * @return a non-null, non-blank fuel varian if {@code fuel} is a fuel, {@link #BLANK} otherwise.
+     * @param item a non-null item
+     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK} otherwise.
      */
-    static FuelVariant of(ItemLike fuel) {
-        return DefaultFuelVariant.of(fuel);
+    static FuelVariant of(Item item) {
+        return DefaultFuelVariant.of(requireNonNull(item));
     }
 
+    /**
+     * Retrieves a instance if {@code item} is actually a fuel.
+     *
+     * @param item a non-null item
+     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK} otherwise.
+     */
+    static FuelVariant of(ItemLike item) {
+        return DefaultFuelVariant.of(requireNonNull(item).asItem());
+    }
+
+    /**
+     * Retrieves a instance if {@code stack} is actually a fuel.
+     *
+     * @param stack a non-null stack
+     * @return a non-blank instance if {@code stack} is a fuel, {@link #BLANK} otherwise.
+     */
+    static FuelVariant of(ItemStack stack) {
+        return DefaultFuelVariant.of(requireNonNull(stack));
+    }
+
+    /**
+     * Retrieves a instance if {@code item} is actually a fuel.
+     *
+     * @param item a non-null item
+     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK} otherwise.
+     */
+    static FuelVariant of(Holder<Item> item) {
+        return DefaultFuelVariant.of(requireNonNull(item).value());
+    }
+
+    /**
+     * Check wether {@code item} is a fuel.
+     *
+     * @param item a non-null item
+     * @return tru if {@code item} is a fuel, false otherwise
+     */
+    static boolean isFuel(Item item) {
+        return DefaultFuelVariant.isFuel(requireNonNull(item));
+    }
+
+    /**
+     * Check wether {@code item} is a fuel.
+     *
+     * @param item a non-null item
+     * @return tru if {@code item} is a fuel, false otherwise
+     */
+    static boolean isFuel(ItemLike item) {
+        return DefaultFuelVariant.isFuel(requireNonNull(item).asItem());
+    }
+
+    /**
+     * Check wether {@code stack} is a fuel.
+     *
+     * @param stack a non-null stack
+     * @return tru if {@code stack} is a fuel, false otherwise
+     */
+    static boolean isFuel(ItemStack stack) {
+        return DefaultFuelVariant.isFuel(requireNonNull(stack));
+    }
+
+    /**
+     * Check wether {@code item} is a fuel.
+     *
+     * @param item a non-null item
+     * @return tru if {@code item} is a fuel, false otherwise
+     */
+    static boolean isFuel(Holder<Item> item) {
+        return DefaultFuelVariant.isFuel(requireNonNull(item).value());
+    }
+
+    /**
+     * Return the immutable item instance of this variant.
+     *
+     * @return a non-null item instance
+     */
     Item getFuel();
 
+    /**
+     * Return the commutated burn duration of this variant.
+     *
+     * @return a non-negative integer
+     */
     int getDuration();
 
     @Override
@@ -127,8 +210,7 @@ public interface FuelVariant extends TransferVariant<Item> {
         return false;
     }
 
-    @SuppressWarnings("deprecation")
     default Holder<Item> getRegistryEntry() {
-        return getFuel().builtInRegistryHolder();
+        return BuiltInRegistries.ITEM.wrapAsHolder(getFuel());
     }
 }
