@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [3.0] - 2026-01-11
+
 ### Changed
 
 + Removed the custom `BurningStorage` block API in favour of `Storage<FuelVariant>`: something much more compatible with Fabric Transfer API.
@@ -70,7 +72,7 @@
 
 ### Fixed
 
-+ Catch potential exceptions when creating dummy entities during `BurningStorage` registration. ([#1](https://github.com/NivOridocs/burning/issues/1))
++ Catch potential exceptions when creating dummy entities during `BurningStorage` registration. ([#1](https://github.com/un-nubivago/burning/issues/1))
 
 ## [0.3] - 2024-10-13
 
@@ -90,12 +92,13 @@
 
 Alpha release.
 
-[2.0]: https://github.com/NivOridocs/burning/releases/tag/2.0
-[1.1+1.21.6]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21.4
-[1.0+1.21.4]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21.4
-[1.0+1.21.2]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21.2
-[1.0+1.21]: https://github.com/NivOridocs/burning/releases/tag/1.0+1.21
-[0.4]: https://github.com/NivOridocs/burning/releases/tag/0.4
-[0.3]: https://github.com/NivOridocs/burning/releases/tag/0.3
-[0.2]: https://github.com/NivOridocs/burning/releases/tag/0.2
-[0.1]: https://github.com/NivOridocs/burning/releases/tag/0.1
+[3.0]: https://github.com/un-nubivago/burning/releases/tag/3.0
+[2.0]: https://github.com/un-nubivago/burning/releases/tag/2.0
+[1.1+1.21.6]: https://github.com/un-nubivago/burning/releases/tag/1.0+1.21.4
+[1.0+1.21.4]: https://github.com/un-nubivago/burning/releases/tag/1.0+1.21.4
+[1.0+1.21.2]: https://github.com/un-nubivago/burning/releases/tag/1.0+1.21.2
+[1.0+1.21]: https://github.com/un-nubivago/burning/releases/tag/1.0+1.21
+[0.4]: https://github.com/un-nubivago/burning/releases/tag/0.4
+[0.3]: https://github.com/un-nubivago/burning/releases/tag/0.3
+[0.2]: https://github.com/un-nubivago/burning/releases/tag/0.2
+[0.1]: https://github.com/un-nubivago/burning/releases/tag/0.1
