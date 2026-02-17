@@ -13,8 +13,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 final class DynamicFurnaceStorageProvider {
 
     public static final ResourceKey<Registry<DynamicFurnaceStorageProvider>> REGISTRY = ResourceKey
-            .createRegistryKey(ResourceLocation.tryParse("burning:dynamic_storage"));
+            .createRegistryKey(Identifier.parse("burning:dynamic_storage"));
 
     public static final Codec<DynamicFurnaceStorageProvider> CODEC = RecordCodecBuilder.create(instance -> instance
             .group(

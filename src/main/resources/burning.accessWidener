@@ -1,4 +1,4 @@
-accessWidener v2 named
+accessWidener v2 official
 
 accessible   field    net/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity   litTimeRemaining   I
 accessible   field    net/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity   litTotalTime       I
@@ -11,3 +11,5 @@ accessible   field    net/minecraft/world/level/block/entity/BlockEntity        
 accessible   method   net/minecraft/world/level/block/entity/BlockEntity                  setChanged         (Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V
 
 extendable   method   net/minecraft/world/level/block/entity/FuelValues                   <init>             (Lit/unimi/dsi/fastutil/objects/Object2IntSortedMap;)V
+
+accessible   field    net/minecraft/world/level/block/entity/FuelValues                   values             Lit/unimi/dsi/fastutil/objects/Object2IntSortedMap;

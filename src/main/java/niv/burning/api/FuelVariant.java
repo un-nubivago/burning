@@ -30,11 +30,11 @@ public interface FuelVariant extends TransferVariant<Item> {
 
     Codec<FuelVariant> CODEC = RecordCodecBuilder.create(instance -> instance
             .group(
-                    BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("fuel").forGetter(FuelVariant::getRegistryEntry))
+                    BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("fuel").forGetter(FuelVariant::typeHolder))
             .apply(instance, FuelVariant::of));
 
     StreamCodec<RegistryFriendlyByteBuf, FuelVariant> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.holderRegistry(Registries.ITEM), FuelVariant::getRegistryEntry,
+            ByteBufCodecs.holderRegistry(Registries.ITEM), FuelVariant::typeHolder,
             FuelVariant::of);
 
     /**
@@ -191,12 +191,12 @@ public interface FuelVariant extends TransferVariant<Item> {
     }
 
     @Override
-    default DataComponentPatch getComponents() {
+    default DataComponentPatch getComponentsPatch() {
         return DataComponentPatch.EMPTY;
     }
 
     @Override
-    default DataComponentMap getComponentMap() {
+    default DataComponentMap getComponents() {
         return DataComponentMap.EMPTY;
     }
 
@@ -210,7 +210,8 @@ public interface FuelVariant extends TransferVariant<Item> {
         return false;
     }
 
-    default Holder<Item> getRegistryEntry() {
+    @Override
+    default Holder<Item> typeHolder() {
         return BuiltInRegistries.ITEM.wrapAsHolder(getFuel());
     }
 }

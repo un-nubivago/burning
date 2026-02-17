@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import niv.burning.api.base.BurningStorageBlockEntity;
 import niv.burning.api.base.SimpleBurningStorage;
 
@@ -34,7 +34,7 @@ public final class BurningStorage {
      * @see {@link SimpleBurningStorage}
      */
     public static final BlockApiLookup<Storage<FuelVariant>, @Nullable Direction> SIDED = BlockApiLookup.get(
-            ResourceLocation.tryParse("burning:sided_storage"),
+            Identifier.parse("burning:sided_storage"),
             Storage.asClass(), Direction.class);
 
     static {
