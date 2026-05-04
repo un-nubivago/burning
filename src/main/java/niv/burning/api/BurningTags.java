@@ -1,5 +1,7 @@
 package niv.burning.api;
 
+import org.jspecify.annotations.NullMarked;
+
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -8,6 +10,7 @@ import net.minecraft.world.level.block.Block;
 /**
  * Provides this library own tags.
  */
+@NullMarked
 public final class BurningTags {
 
     /**

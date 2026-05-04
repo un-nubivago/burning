@@ -1,9 +1,12 @@
 package niv.burning.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +21,7 @@ import net.minecraft.world.level.block.entity.FuelValues;
 import niv.burning.api.BurningStorage;
 
 @Internal
+@NullMarked
 public final class Burning {
 
     static final String MOD_ID;
@@ -31,7 +35,7 @@ public final class Burning {
     static {
         MOD_ID = "burning";
         MOD_NAME = "Burning";
-        LOGGER = LoggerFactory.getLogger(MOD_NAME);
+        LOGGER = requireNonNull(LoggerFactory.getLogger(MOD_NAME));
 
         fuelValuesGetter = () -> {
             final var getter = FuelValues.vanillaBurnTimes(HolderLookup.Provider.create(
@@ -44,16 +48,18 @@ public final class Burning {
         /*
          * Register a dynamic registry for DynamicBurningStorageProvider.
          */
-        DynamicRegistries.register(DynamicFurnaceStorageProvider.REGISTRY, DynamicFurnaceStorageProvider.CODEC);
+        DynamicRegistries.register(
+                requireNonNull(DynamicFurnaceStorageProvider.REGISTRY),
+                requireNonNull(DynamicFurnaceStorageProvider.CODEC));
 
         /*
          * Register as providers all loaded DynamicBurningStorageProviders.
          */
         ServerLifecycleEvents.SERVER_STARTING.register(server -> server.registryAccess()
-                .lookup(DynamicFurnaceStorageProvider.REGISTRY).stream()
+                .lookup(requireNonNull(DynamicFurnaceStorageProvider.REGISTRY)).stream()
                 .flatMap(Registry::stream)
                 .forEach(provider -> BurningStorage.SIDED
-                        .registerForBlockEntity(provider::getBurningStorage, provider.type)));
+                        .registerForBlockEntity(provider::getBurningStorage, requireNonNull(provider.type))));
 
         /*
          * Capture the server-scoped fuel values
@@ -69,6 +75,6 @@ public final class Burning {
     }
 
     static final FuelValues fuelValues() {
-        return fuelValuesGetter.get();
+        return requireNonNull(fuelValuesGetter.get());
     }
 }

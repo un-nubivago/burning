@@ -1,9 +1,12 @@
 package niv.burning.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -48,12 +51,13 @@ final class DynamicFurnaceStorageProvider {
     }
 
     static final DynamicFurnaceStorageProvider from(BlockEntityType<?> type, String litTime, String litDuration) {
-        Class<?> clazz = ((BlockEntityTypeAccessor) type).getBlocks()
+        Optional<@NonNull Class<?>> optional = ((BlockEntityTypeAccessor) type).getBlocks()
                 .stream().findAny()
                 .map(Block::defaultBlockState)
-                .map(state -> type.create(BlockPos.ZERO, state).getClass())
-                .orElse(null);
-        if (clazz != null) {
+                .map(state -> type.create(BlockPos.ZERO, state))
+                .map(Object::getClass);
+        if (optional.isPresent()) {
+            var clazz = requireNonNull(optional.get());
             var litTimeField = Optional.ofNullable(FieldUtils
                     .getField(clazz, litTime, true))
                     .flatMap(DynamicField::of);

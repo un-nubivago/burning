@@ -1,9 +1,14 @@
 package niv.burning.impl;
 
 import static java.lang.Math.clamp;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.Iterator;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
@@ -16,14 +21,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.FuelVariant;
 import niv.burning.api.base.BurningStorageBlockEntity;
 
+@NullMarked
 abstract class AbstractFurnaceStorage<T extends BlockEntity>
         extends SnapshotParticipant<ResourceAmount<FuelVariant>>
         implements SingleSlotStorage<FuelVariant>, InsertionOnlyStorage<FuelVariant> {
 
-    protected final T target;
+    protected final @NonNull T target;
 
     AbstractFurnaceStorage(T target) {
-        this.target = target;
+        this.target = requireNonNull(target);
     }
 
     protected abstract void setResource(FuelVariant resource);
@@ -46,7 +52,10 @@ abstract class AbstractFurnaceStorage<T extends BlockEntity>
     }
 
     @Override
-    public long insert(FuelVariant resource, long maxAmount, TransactionContext transaction) {
+    public long insert(@Nullable FuelVariant resource, long maxAmount, TransactionContext transaction) {
+        if (resource == null)
+            return 0;
+
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
         var oldCapacity = getCapacity();
@@ -74,13 +83,13 @@ abstract class AbstractFurnaceStorage<T extends BlockEntity>
     }
 
     @Override
-    public long extract(FuelVariant resource, long maxAmount, TransactionContext transaction) {
+    public long extract(@Nullable FuelVariant resource, long maxAmount, TransactionContext transaction) {
         return 0L;
     }
 
     @Override
     public Iterator<StorageView<FuelVariant>> iterator() {
-        return Collections.emptyIterator();
+        return requireNonNull(Collections.emptyIterator());
     }
 
     @Override
@@ -89,9 +98,11 @@ abstract class AbstractFurnaceStorage<T extends BlockEntity>
     }
 
     @Override
-    protected void readSnapshot(ResourceAmount<FuelVariant> snapshot) {
-        setResource(snapshot.resource());
-        setAmount(snapshot.amount());
+    protected void readSnapshot(@Nullable ResourceAmount<FuelVariant> snapshot) {
+        if (snapshot != null) {
+            setResource(requireNonNull(snapshot.resource()));
+            setAmount(snapshot.amount());
+        }
     }
 
     @Override

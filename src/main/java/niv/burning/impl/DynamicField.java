@@ -1,5 +1,7 @@
 package niv.burning.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.function.Function;
@@ -35,7 +37,7 @@ abstract class DynamicField {
 
     static final Optional<DynamicField> of(Field field) {
         return Optional.ofNullable(MAP.getOrDefault(field.getType(), null))
-                .map(constructor -> constructor.apply(field));
+                .map(constructor -> requireNonNull(constructor).apply(field));
     }
 
     private static final class IntegerField extends DynamicField {

@@ -1,5 +1,7 @@
 package niv.burning.api.base;
 
+import static java.util.Objects.requireNonNull;
+
 import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -42,7 +44,7 @@ public interface BurningStorageBlockEntity {
      * Tries to update the {@link BlockStateProperties#LIT LIT} property of
      * {@code entity} to match {@code isBurning}.
      *
-     * @param entity  a non-null block entity
+     * @param entity    a non-null block entity
      * @param isBurning a boolean indicating wether entity is burning fuel
      * @return true if manages to change the LIT property; false otherwise
      */
@@ -60,7 +62,7 @@ public interface BurningStorageBlockEntity {
         if (wasBurning.equals(isBurning))
             return false;
 
-        state = state.setValue(BlockStateProperties.LIT, isBurning);
+        state = requireNonNull(state.setValue(BlockStateProperties.LIT, isBurning));
         level.setBlockAndUpdate(pos, state);
         return true;
     }
