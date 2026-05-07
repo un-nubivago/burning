@@ -1,12 +1,12 @@
 package niv.burning.impl;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -22,11 +22,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
-final class DynamicFurnaceStorageProvider {
+@SuppressWarnings("null")
+@NullMarked
+final class DynamicFurnaceStorageProvider
+        implements BiFunction<@NonNull BlockEntity, @Nullable Direction, DynamicFurnaceStorage> {
 
     public static final ResourceKey<Registry<DynamicFurnaceStorageProvider>> REGISTRY = ResourceKey
             .createRegistryKey(Identifier.parse("burning:dynamic_storage"));
 
+    @SuppressWarnings("null")
     public static final Codec<DynamicFurnaceStorageProvider> CODEC = RecordCodecBuilder.create(instance -> instance
             .group(
                     BuiltInRegistries.BLOCK_ENTITY_TYPE.byNameCodec().fieldOf("type").forGetter(src -> src.type),
@@ -46,18 +50,19 @@ final class DynamicFurnaceStorageProvider {
         this.litDuration = litDuration;
     }
 
-    public @Nullable DynamicFurnaceStorage getBurningStorage(BlockEntity entity, @Nullable Direction side) {
+    @Override
+    public DynamicFurnaceStorage apply(BlockEntity entity, @Nullable Direction side) {
         return new DynamicFurnaceStorage(this, entity);
     }
 
-    static final DynamicFurnaceStorageProvider from(BlockEntityType<?> type, String litTime, String litDuration) {
+    static final @Nullable DynamicFurnaceStorageProvider from(BlockEntityType<?> type, String litTime, String litDuration) {
         Optional<@NonNull Class<?>> optional = ((BlockEntityTypeAccessor) type).getBlocks()
                 .stream().findAny()
                 .map(Block::defaultBlockState)
                 .map(state -> type.create(BlockPos.ZERO, state))
                 .map(Object::getClass);
         if (optional.isPresent()) {
-            var clazz = requireNonNull(optional.get());
+            var clazz = optional.get();
             var litTimeField = Optional.ofNullable(FieldUtils
                     .getField(clazz, litTime, true))
                     .flatMap(DynamicField::of);

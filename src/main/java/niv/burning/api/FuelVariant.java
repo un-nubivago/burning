@@ -1,14 +1,7 @@
 package niv.burning.api;
 
-import static java.util.Objects.requireNonNull;
-
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
@@ -23,6 +16,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import niv.burning.impl.DefaultFuelVariant;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Provides an immutable wrapper around a fuel item, with no data components.
@@ -32,17 +27,24 @@ import niv.burning.impl.DefaultFuelVariant;
  */
 @NullMarked
 public interface FuelVariant extends TransferVariant<Item> {
-
     @SuppressWarnings("null")
-    Codec<@NonNull FuelVariant> CODEC = RecordCodecBuilder.create(instance -> instance
+    Codec<@Nullable FuelVariant> CODEC = RecordCodecBuilder.create(instance ->
+        instance
             .group(
-                    BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("fuel").forGetter(FuelVariant::typeHolder))
-            .apply(instance, FuelVariant::of));
+                BuiltInRegistries.ITEM.holderByNameCodec()
+                    .fieldOf("fuel")
+                    .forGetter(FuelVariant::typeHolder)
+            )
+            .apply(instance, FuelVariant::of)
+    );
 
     @SuppressWarnings("null")
-    StreamCodec<RegistryFriendlyByteBuf, @NonNull FuelVariant> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.holderRegistry(Registries.ITEM), FuelVariant::typeHolder,
-            FuelVariant::of);
+    StreamCodec<RegistryFriendlyByteBuf, @Nullable FuelVariant> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.holderRegistry(Registries.ITEM),
+            FuelVariant::typeHolder,
+            FuelVariant::of
+        );
 
     /**
      * Shortcut to {@code FuelVarian.of(Items.LAVA_BUCKET)}
@@ -168,7 +170,7 @@ public interface FuelVariant extends TransferVariant<Item> {
      * @return tru if {@code stack} is a fuel, false otherwise
      */
     static boolean isFuel(@Nullable ItemStack stack) {
-        return DefaultFuelVariant.isFuel(requireNonNull(stack));
+        return DefaultFuelVariant.isFuel(stack);
     }
 
     /**
@@ -177,8 +179,8 @@ public interface FuelVariant extends TransferVariant<Item> {
      * @param item an item
      * @return tru if {@code item} is a fuel, false otherwise
      */
-    static boolean isFuel(Holder<Item> item) {
-        return DefaultFuelVariant.isFuel(requireNonNull(item.value()));
+    static boolean isFuel(@Nullable Holder<Item> item) {
+        return DefaultFuelVariant.isFuel(item == null ? null : item.value());
     }
 
     /**
@@ -222,7 +224,7 @@ public interface FuelVariant extends TransferVariant<Item> {
     }
 
     @Override
-    default boolean componentsMatch(DataComponentPatch other) {
+    default boolean componentsMatch(@Nullable DataComponentPatch other) {
         return false;
     }
 

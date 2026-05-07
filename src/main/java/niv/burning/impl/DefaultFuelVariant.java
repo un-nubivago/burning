@@ -1,7 +1,5 @@
 package niv.burning.impl;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,8 +22,8 @@ public final class DefaultFuelVariant implements FuelVariant {
     private final Item fuel;
     private final int hashCode;
 
-    DefaultFuelVariant(@Nullable Item fuel) {
-        this.fuel = requireNonNull(fuel);
+    DefaultFuelVariant(Item fuel) {
+        this.fuel = fuel;
         this.hashCode = Objects.hash(fuel);
     }
 
@@ -56,14 +54,16 @@ public final class DefaultFuelVariant implements FuelVariant {
         return this.hashCode;
     }
 
+    @SuppressWarnings("null")
     @Internal
     public static FuelVariant of(@Nullable Item item) {
-        return item != null && isFuel(item) ? requireNonNull(INTERN.computeIfAbsent(item, DefaultFuelVariant::new)) : BLANK;
+        return item != null && isFuel(item) ? INTERN.computeIfAbsent(item, DefaultFuelVariant::new) : BLANK;
     }
 
+    @SuppressWarnings("null")
     @Internal
     public static FuelVariant of(@Nullable ItemStack stack) {
-        return stack != null && isFuel(stack) ? requireNonNull(INTERN.computeIfAbsent(stack.getItem(), DefaultFuelVariant::new)) : BLANK;
+        return stack != null && isFuel(stack) ? INTERN.computeIfAbsent(stack.getItem(), DefaultFuelVariant::new) : BLANK;
     }
 
     @Internal

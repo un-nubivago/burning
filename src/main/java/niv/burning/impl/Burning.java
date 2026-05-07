@@ -1,7 +1,5 @@
 package niv.burning.impl;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -20,6 +18,7 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.entity.FuelValues;
 import niv.burning.api.BurningStorage;
 
+@SuppressWarnings("null")
 @Internal
 @NullMarked
 public final class Burning {
@@ -35,7 +34,7 @@ public final class Burning {
     static {
         MOD_ID = "burning";
         MOD_NAME = "Burning";
-        LOGGER = requireNonNull(LoggerFactory.getLogger(MOD_NAME));
+        LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
         fuelValuesGetter = () -> {
             final var getter = FuelValues.vanillaBurnTimes(HolderLookup.Provider.create(
@@ -49,17 +48,17 @@ public final class Burning {
          * Register a dynamic registry for DynamicBurningStorageProvider.
          */
         DynamicRegistries.register(
-                requireNonNull(DynamicFurnaceStorageProvider.REGISTRY),
-                requireNonNull(DynamicFurnaceStorageProvider.CODEC));
+                DynamicFurnaceStorageProvider.REGISTRY,
+                DynamicFurnaceStorageProvider.CODEC);
 
         /*
          * Register as providers all loaded DynamicBurningStorageProviders.
          */
         ServerLifecycleEvents.SERVER_STARTING.register(server -> server.registryAccess()
-                .lookup(requireNonNull(DynamicFurnaceStorageProvider.REGISTRY)).stream()
+                .lookup(DynamicFurnaceStorageProvider.REGISTRY).stream()
                 .flatMap(Registry::stream)
                 .forEach(provider -> BurningStorage.SIDED
-                        .registerForBlockEntity(provider::getBurningStorage, requireNonNull(provider.type))));
+                        .registerForBlockEntity(provider::apply, provider.type)));
 
         /*
          * Capture the server-scoped fuel values
@@ -75,6 +74,6 @@ public final class Burning {
     }
 
     static final FuelValues fuelValues() {
-        return requireNonNull(fuelValuesGetter.get());
+        return fuelValuesGetter.get();
     }
 }

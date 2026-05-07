@@ -1,6 +1,8 @@
 package niv.burning.impl.mixin;
 
-import org.jetbrains.annotations.Nullable;
+
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,6 +25,7 @@ import niv.burning.impl.AbstractFurnaceBlockEntityExtension;
 import niv.burning.impl.DefaultFurnaceStorage;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
+@NullMarked
 class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExtension {
 
     private static final String BLOCK_POS = "Lnet/minecraft/core/BlockPos;";
@@ -33,7 +36,7 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
     private static final String SERVER_LEVEL = "Lnet/minecraft/server/level/ServerLevel;";
 
     @Unique
-    private Storage<FuelVariant> internalBurningStorage;
+    private @Nullable Storage<FuelVariant> internalBurningStorage;
 
     @Unique
     private Item internalLastBurnedFuel = Items.AIR;
@@ -46,10 +49,11 @@ class AbstractFurnaceBlockEntityMixin implements AbstractFurnaceBlockEntityExten
 
     @Unique
     @Override
-    public void setInternalBurningFuel(Item fuel) {
+    public void setInternalBurningFuel(@Nullable Item fuel) {
         this.internalLastBurnedFuel = fuel == null ? Items.AIR : fuel;
     }
 
+    @SuppressWarnings("java:S2638")
     @Override
     public @Nullable Storage<FuelVariant> getBurningStorage(@Nullable Direction direction) {
         if (((BlockEntity) (Object) this).getBlockState().is(BurningTags.BLACKLIST))

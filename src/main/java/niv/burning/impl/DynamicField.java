@@ -1,13 +1,15 @@
 package niv.burning.impl;
 
-import static java.util.Objects.requireNonNull;
-
 import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.jspecify.annotations.NullMarked;
+
 import com.google.common.collect.ImmutableMap;
 
+@SuppressWarnings("null")
+@NullMarked
 abstract class DynamicField {
 
     private static final ImmutableMap<Class<?>, Function<Field, ? extends DynamicField>> MAP;
@@ -37,7 +39,7 @@ abstract class DynamicField {
 
     static final Optional<DynamicField> of(Field field) {
         return Optional.ofNullable(MAP.getOrDefault(field.getType(), null))
-                .map(constructor -> requireNonNull(constructor).apply(field));
+                .map(constructor -> constructor.apply(field));
     }
 
     private static final class IntegerField extends DynamicField {

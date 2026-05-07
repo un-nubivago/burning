@@ -3,12 +3,14 @@ package niv.burning.impl;
 import static java.lang.Math.clamp;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
+import org.jspecify.annotations.NullMarked;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import niv.burning.api.FuelVariant;
 
 @Internal
+@NullMarked
 public final class DefaultFurnaceStorage extends AbstractFurnaceStorage<AbstractFurnaceBlockEntity> {
 
     public DefaultFurnaceStorage(AbstractFurnaceBlockEntity target) {

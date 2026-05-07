@@ -77,7 +77,7 @@ public class SimpleBurningStorage extends SingleVariantStorage<@Nullable FuelVar
     // SingleSlotStorage
 
     @Override
-    public long insert(@Nullable FuelVariant resource, long maxAmount, @Nullable TransactionContext transaction) {
+    public long insert(@Nullable FuelVariant resource, long maxAmount, TransactionContext transaction) {
         if (resource == null)
             return 0L;
 
@@ -90,8 +90,7 @@ public class SimpleBurningStorage extends SingleVariantStorage<@Nullable FuelVar
         if (newAmount <= oldAmount)
             return 0L;
 
-        if (transaction != null)
-            updateSnapshots(transaction);
+        updateSnapshots(transaction);
 
         if (newAmount > oldCapacity) {
             this.variant = resource;
@@ -105,7 +104,7 @@ public class SimpleBurningStorage extends SingleVariantStorage<@Nullable FuelVar
     }
 
     @Override
-    public long extract(@Nullable FuelVariant resource, long maxAmount, @Nullable TransactionContext transaction) {
+    public long extract(@Nullable FuelVariant resource, long maxAmount, TransactionContext transaction) {
         if (resource == null)
             return 0L;
 
@@ -118,8 +117,7 @@ public class SimpleBurningStorage extends SingleVariantStorage<@Nullable FuelVar
         if (newAmount >= oldAmount)
             return 0L;
 
-        if (transaction != null)
-            updateSnapshots(transaction);
+        updateSnapshots(transaction);
 
         if (oldCapacity > newCapacity && newAmount <= newCapacity)
             this.variant = resource;

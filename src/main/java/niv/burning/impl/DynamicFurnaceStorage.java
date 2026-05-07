@@ -1,10 +1,14 @@
 package niv.burning.impl;
 
+import org.jspecify.annotations.NullMarked;
+
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.FuelVariant;
 
+@SuppressWarnings("null")
+@NullMarked
 final class DynamicFurnaceStorage extends AbstractFurnaceStorage<BlockEntity> {
 
     private final DynamicFurnaceStorageProvider provider;
@@ -39,6 +43,6 @@ final class DynamicFurnaceStorage extends AbstractFurnaceStorage<BlockEntity> {
 
     @Override
     public long getAmount() {
-        return this.provider.litTime.get(target).longValue();
+        return this.provider.litTime.get(this.target).longValue();
     }
 }

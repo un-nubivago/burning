@@ -1,12 +1,10 @@
 package niv.burning.impl;
 
 import static java.lang.Math.clamp;
-import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -26,10 +24,10 @@ abstract class AbstractFurnaceStorage<T extends BlockEntity>
         extends SnapshotParticipant<ResourceAmount<FuelVariant>>
         implements SingleSlotStorage<FuelVariant>, InsertionOnlyStorage<FuelVariant> {
 
-    protected final @NonNull T target;
+    protected final T target;
 
     AbstractFurnaceStorage(T target) {
-        this.target = requireNonNull(target);
+        this.target = target;
     }
 
     protected abstract void setResource(FuelVariant resource);
@@ -87,9 +85,10 @@ abstract class AbstractFurnaceStorage<T extends BlockEntity>
         return 0L;
     }
 
+    @SuppressWarnings("null")
     @Override
     public Iterator<StorageView<FuelVariant>> iterator() {
-        return requireNonNull(Collections.emptyIterator());
+        return Collections.emptyIterator();
     }
 
     @Override
@@ -97,19 +96,21 @@ abstract class AbstractFurnaceStorage<T extends BlockEntity>
         return new ResourceAmount<>(getResource(), getAmount());
     }
 
+    @SuppressWarnings("null")
     @Override
     protected void readSnapshot(@Nullable ResourceAmount<FuelVariant> snapshot) {
         if (snapshot != null) {
-            setResource(requireNonNull(snapshot.resource()));
+            setResource(snapshot.resource());
             setAmount(snapshot.amount());
         }
     }
 
     @Override
     protected void onFinalCommit() {
-        if (this.target.hasLevel()) {
-            BurningStorageBlockEntity.tryUpdateLitProperty(target, getAmount() > 0);
-            this.target.setChanged();
+        var safeTarget = this.target;
+        if (safeTarget != null && safeTarget.hasLevel()) {
+            BurningStorageBlockEntity.tryUpdateLitProperty(safeTarget, getAmount() > 0);
+            safeTarget.setChanged();
         }
     }
 }
