@@ -1,5 +1,7 @@
 package niv.burning.impl;
 
+import org.jspecify.annotations.NullMarked;
+
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntSortedMap;
 import net.minecraft.core.BlockPos;
@@ -10,6 +12,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 
+@SuppressWarnings("null")
+@NullMarked
 public class CommonUtils {
     private CommonUtils() {
     }

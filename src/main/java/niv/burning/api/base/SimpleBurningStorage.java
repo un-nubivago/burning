@@ -2,6 +2,9 @@ package niv.burning.api.base;
 
 import static java.lang.Math.clamp;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -49,14 +52,14 @@ import niv.burning.api.FuelVariant;
  *
  * @since 1.0
  */
-public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
+@NullMarked
+public class SimpleBurningStorage extends SingleVariantStorage<@Nullable FuelVariant> {
 
     /**
      * Class constructor.
      */
     public SimpleBurningStorage() {
-        this.variant = FuelVariant.BLANK;
-        this.amount = 0L;
+        super();
     }
 
     // SingleVariantStorage
@@ -67,14 +70,17 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
     }
 
     @Override
-    protected long getCapacity(FuelVariant variant) {
-        return variant.getDuration();
+    protected long getCapacity(@Nullable FuelVariant variant) {
+        return variant == null ? 0 : variant.getDuration();
     }
 
     // SingleSlotStorage
 
     @Override
-    public long insert(FuelVariant resource, long maxAmount, TransactionContext transaction) {
+    public long insert(@Nullable FuelVariant resource, long maxAmount, TransactionContext transaction) {
+        if (resource == null)
+            return 0L;
+
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
         var oldCapacity = getCapacity();
@@ -98,7 +104,10 @@ public class SimpleBurningStorage extends SingleVariantStorage<FuelVariant> {
     }
 
     @Override
-    public long extract(FuelVariant resource, long maxAmount, TransactionContext transaction) {
+    public long extract(@Nullable FuelVariant resource, long maxAmount, TransactionContext transaction) {
+        if (resource == null)
+            return 0L;
+
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
         var oldCapacity = getCapacity();

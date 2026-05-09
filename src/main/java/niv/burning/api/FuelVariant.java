@@ -1,10 +1,7 @@
 package niv.burning.api;
 
-import static java.util.Objects.requireNonNull;
-
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
@@ -19,6 +16,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import niv.burning.impl.DefaultFuelVariant;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Provides an immutable wrapper around a fuel item, with no data components.
@@ -26,35 +25,49 @@ import niv.burning.impl.DefaultFuelVariant;
  * <p>
  * Do not implement, use the static {@code of(...)} functions instead.
  */
+@NullMarked
 public interface FuelVariant extends TransferVariant<Item> {
-
-    Codec<FuelVariant> CODEC = RecordCodecBuilder.create(instance -> instance
+    @SuppressWarnings("null")
+    Codec<@Nullable FuelVariant> CODEC = RecordCodecBuilder.create(instance ->
+        instance
             .group(
-                    BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("fuel").forGetter(FuelVariant::getRegistryEntry))
-            .apply(instance, FuelVariant::of));
+                BuiltInRegistries.ITEM.holderByNameCodec()
+                    .fieldOf("fuel")
+                    .forGetter(FuelVariant::typeHolder)
+            )
+            .apply(instance, FuelVariant::of)
+    );
 
-    StreamCodec<RegistryFriendlyByteBuf, FuelVariant> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.holderRegistry(Registries.ITEM), FuelVariant::getRegistryEntry,
-            FuelVariant::of);
+    @SuppressWarnings("null")
+    StreamCodec<RegistryFriendlyByteBuf, @Nullable FuelVariant> STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.holderRegistry(Registries.ITEM),
+            FuelVariant::typeHolder,
+            FuelVariant::of
+        );
 
     /**
      * Shortcut to {@code FuelVarian.of(Items.LAVA_BUCKET)}
      */
+
     FuelVariant LAVA_BUCKET = of(Items.LAVA_BUCKET);
 
     /**
      * Shortcut to {@code FuelVarian.of(Items.BLAZE_ROD)}
      */
+
     FuelVariant BLAZE_ROD = of(Items.BLAZE_ROD);
 
     /**
      * Shortcut to {@code FuelVarian.of(Items.COAL)}
      */
+
     FuelVariant COAL = of(Items.COAL);
 
     /**
      * A singleton blank instance
      */
+
     FuelVariant BLANK = new FuelVariant() {
         @Override
         public Item getFuel() {
@@ -89,81 +102,85 @@ public interface FuelVariant extends TransferVariant<Item> {
     /**
      * Retrieves a instance if {@code item} is actually a fuel.
      *
-     * @param item a non-null item
-     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK} otherwise.
+     * @param item an item
+     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK}
+     *         otherwise.
      */
-    static FuelVariant of(Item item) {
-        return DefaultFuelVariant.of(requireNonNull(item));
+    static FuelVariant of(@Nullable Item item) {
+        return DefaultFuelVariant.of(item);
     }
 
     /**
      * Retrieves a instance if {@code item} is actually a fuel.
      *
-     * @param item a non-null item
-     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK} otherwise.
+     * @param item an item
+     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK}
+     *         otherwise.
      */
-    static FuelVariant of(ItemLike item) {
-        return DefaultFuelVariant.of(requireNonNull(item).asItem());
+    static FuelVariant of(@Nullable ItemLike item) {
+        return DefaultFuelVariant.of(item == null ? null : item.asItem());
     }
 
     /**
      * Retrieves a instance if {@code stack} is actually a fuel.
      *
-     * @param stack a non-null stack
-     * @return a non-blank instance if {@code stack} is a fuel, {@link #BLANK} otherwise.
+     * @param stack a stack
+     * @return a non-blank instance if {@code stack} is a fuel, {@link #BLANK}
+     *         otherwise.
      */
-    static FuelVariant of(ItemStack stack) {
-        return DefaultFuelVariant.of(requireNonNull(stack));
+    static FuelVariant of(@Nullable ItemStack stack) {
+        return DefaultFuelVariant.of(stack);
     }
 
     /**
      * Retrieves a instance if {@code item} is actually a fuel.
      *
-     * @param item a non-null item
-     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK} otherwise.
+     * @param item an item
+     * @return a non-blank instance if {@code item} is a fuel, {@link #BLANK}
+     *         otherwise.
      */
-    static FuelVariant of(Holder<Item> item) {
-        return DefaultFuelVariant.of(requireNonNull(item).value());
+    static FuelVariant of(@Nullable Holder<Item> item) {
+        return DefaultFuelVariant.of(item == null ? null : item.value());
     }
 
     /**
      * Check wether {@code item} is a fuel.
      *
-     * @param item a non-null item
+     * @param item an item
      * @return tru if {@code item} is a fuel, false otherwise
      */
-    static boolean isFuel(Item item) {
-        return DefaultFuelVariant.isFuel(requireNonNull(item));
+    static boolean isFuel(@Nullable Item item) {
+        return DefaultFuelVariant.isFuel(item);
     }
 
     /**
      * Check wether {@code item} is a fuel.
      *
-     * @param item a non-null item
+     * @param item an item
      * @return tru if {@code item} is a fuel, false otherwise
      */
-    static boolean isFuel(ItemLike item) {
-        return DefaultFuelVariant.isFuel(requireNonNull(item).asItem());
+    static boolean isFuel(@Nullable ItemLike item) {
+        return DefaultFuelVariant.isFuel(item == null ? null : item.asItem());
     }
 
     /**
      * Check wether {@code stack} is a fuel.
      *
-     * @param stack a non-null stack
+     * @param stack a stack
      * @return tru if {@code stack} is a fuel, false otherwise
      */
-    static boolean isFuel(ItemStack stack) {
-        return DefaultFuelVariant.isFuel(requireNonNull(stack));
+    static boolean isFuel(@Nullable ItemStack stack) {
+        return DefaultFuelVariant.isFuel(stack);
     }
 
     /**
      * Check wether {@code item} is a fuel.
      *
-     * @param item a non-null item
+     * @param item an item
      * @return tru if {@code item} is a fuel, false otherwise
      */
-    static boolean isFuel(Holder<Item> item) {
-        return DefaultFuelVariant.isFuel(requireNonNull(item).value());
+    static boolean isFuel(@Nullable Holder<Item> item) {
+        return DefaultFuelVariant.isFuel(item == null ? null : item.value());
     }
 
     /**
@@ -171,6 +188,7 @@ public interface FuelVariant extends TransferVariant<Item> {
      *
      * @return a non-null item instance
      */
+
     Item getFuel();
 
     /**
@@ -191,12 +209,12 @@ public interface FuelVariant extends TransferVariant<Item> {
     }
 
     @Override
-    default DataComponentPatch getComponents() {
+    default DataComponentPatch getComponentsPatch() {
         return DataComponentPatch.EMPTY;
     }
 
     @Override
-    default DataComponentMap getComponentMap() {
+    default DataComponentMap getComponents() {
         return DataComponentMap.EMPTY;
     }
 
@@ -206,11 +224,12 @@ public interface FuelVariant extends TransferVariant<Item> {
     }
 
     @Override
-    default boolean componentsMatch(DataComponentPatch other) {
+    default boolean componentsMatch(@Nullable DataComponentPatch other) {
         return false;
     }
 
-    default Holder<Item> getRegistryEntry() {
+    @Override
+    default Holder<Item> typeHolder() {
         return BuiltInRegistries.ITEM.wrapAsHolder(getFuel());
     }
 }

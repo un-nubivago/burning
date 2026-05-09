@@ -5,6 +5,9 @@ import static java.lang.Math.clamp;
 import java.util.Collections;
 import java.util.Iterator;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
 import net.fabricmc.fabric.api.transfer.v1.storage.StoragePreconditions;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.InsertionOnlyStorage;
@@ -16,6 +19,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import niv.burning.api.FuelVariant;
 import niv.burning.api.base.BurningStorageBlockEntity;
 
+@NullMarked
 abstract class AbstractFurnaceStorage<T extends BlockEntity>
         extends SnapshotParticipant<ResourceAmount<FuelVariant>>
         implements SingleSlotStorage<FuelVariant>, InsertionOnlyStorage<FuelVariant> {
@@ -46,7 +50,10 @@ abstract class AbstractFurnaceStorage<T extends BlockEntity>
     }
 
     @Override
-    public long insert(FuelVariant resource, long maxAmount, TransactionContext transaction) {
+    public long insert(@Nullable FuelVariant resource, long maxAmount, TransactionContext transaction) {
+        if (resource == null)
+            return 0;
+
         StoragePreconditions.notBlankNotNegative(resource, maxAmount);
 
         var oldCapacity = getCapacity();
@@ -74,10 +81,11 @@ abstract class AbstractFurnaceStorage<T extends BlockEntity>
     }
 
     @Override
-    public long extract(FuelVariant resource, long maxAmount, TransactionContext transaction) {
+    public long extract(@Nullable FuelVariant resource, long maxAmount, TransactionContext transaction) {
         return 0L;
     }
 
+    @SuppressWarnings("null")
     @Override
     public Iterator<StorageView<FuelVariant>> iterator() {
         return Collections.emptyIterator();
@@ -88,17 +96,21 @@ abstract class AbstractFurnaceStorage<T extends BlockEntity>
         return new ResourceAmount<>(getResource(), getAmount());
     }
 
+    @SuppressWarnings("null")
     @Override
-    protected void readSnapshot(ResourceAmount<FuelVariant> snapshot) {
-        setResource(snapshot.resource());
-        setAmount(snapshot.amount());
+    protected void readSnapshot(@Nullable ResourceAmount<FuelVariant> snapshot) {
+        if (snapshot != null) {
+            setResource(snapshot.resource());
+            setAmount(snapshot.amount());
+        }
     }
 
     @Override
     protected void onFinalCommit() {
-        if (this.target.hasLevel()) {
-            BurningStorageBlockEntity.tryUpdateLitProperty(target, getAmount() > 0);
-            this.target.setChanged();
+        var safeTarget = this.target;
+        if (safeTarget != null && safeTarget.hasLevel()) {
+            BurningStorageBlockEntity.tryUpdateLitProperty(safeTarget, getAmount() > 0);
+            safeTarget.setChanged();
         }
     }
 }

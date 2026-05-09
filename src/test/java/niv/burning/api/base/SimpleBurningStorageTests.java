@@ -14,6 +14,7 @@ import net.minecraft.world.item.Items;
 import niv.burning.api.FuelVariant;
 import niv.burning.impl.CommonUtils;
 
+@SuppressWarnings("null")
 class SimpleBurningStorageTests {
 
     @BeforeAll

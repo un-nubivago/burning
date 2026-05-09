@@ -4,8 +4,12 @@ import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.jspecify.annotations.NullMarked;
+
 import com.google.common.collect.ImmutableMap;
 
+@SuppressWarnings("null")
+@NullMarked
 abstract class DynamicField {
 
     private static final ImmutableMap<Class<?>, Function<Field, ? extends DynamicField>> MAP;
@@ -47,7 +51,7 @@ abstract class DynamicField {
         Double get(Object target) {
             try {
                 return Double.valueOf(field.getInt(target));
-            } catch (NullPointerException ex) {
+            } catch (NullPointerException _) {
                 return 0d;
             } catch (IllegalArgumentException | IllegalAccessException ex) {
                 throw new IllegalStateException(ex);
@@ -74,7 +78,7 @@ abstract class DynamicField {
         Double get(Object target) {
             try {
                 return Double.valueOf(field.getLong(target));
-            } catch (NullPointerException ex) {
+            } catch (NullPointerException _) {
                 return 0d;
             } catch (IllegalArgumentException | IllegalAccessException ex) {
                 throw new IllegalStateException(ex);
@@ -101,7 +105,7 @@ abstract class DynamicField {
         Double get(Object target) {
             try {
                 return Double.valueOf(field.getFloat(target));
-            } catch (NullPointerException ex) {
+            } catch (NullPointerException _) {
                 return 0d;
             } catch (IllegalArgumentException | IllegalAccessException ex) {
                 throw new IllegalStateException(ex);
@@ -128,7 +132,7 @@ abstract class DynamicField {
         Double get(Object target) {
             try {
                 return Double.valueOf(field.getDouble(target));
-            } catch (NullPointerException ex) {
+            } catch (NullPointerException _) {
                 return 0d;
             } catch (IllegalArgumentException | IllegalAccessException ex) {
                 throw new IllegalStateException(ex);

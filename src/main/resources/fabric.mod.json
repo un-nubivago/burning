@@ -13,7 +13,7 @@
     },
     "custom": {
         "loom:injected_interfaces": {
-            "net/minecraft/class_2609": [
+            "net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity": [
                 "niv/burning/impl/AbstractFurnaceBlockEntityExtension"
             ]
         }
@@ -32,8 +32,8 @@
     ],
     "depends": {
         "fabricloader": ">=${loader_version}",
-        "minecraft": "~${minecraft_version}",
-        "java": ">=21",
-        "fabric-api": ">=${fabric_version}"
+        "minecraft": "~26.1",
+        "java": ">=25",
+        "fabric-api": "*"
     }
 }

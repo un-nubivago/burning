@@ -1,6 +1,7 @@
 package niv.burning.api.base;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
@@ -26,6 +27,7 @@ import niv.burning.api.FuelVariant;
  *
  * @since 2.0
  */
+@NullMarked
 public interface BurningStorageBlockEntity {
 
     /**
@@ -42,10 +44,11 @@ public interface BurningStorageBlockEntity {
      * Tries to update the {@link BlockStateProperties#LIT LIT} property of
      * {@code entity} to match {@code isBurning}.
      *
-     * @param entity  a non-null block entity
+     * @param entity    a non-null block entity
      * @param isBurning a boolean indicating wether entity is burning fuel
      * @return true if manages to change the LIT property; false otherwise
      */
+    @SuppressWarnings("null")
     static boolean tryUpdateLitProperty(BlockEntity entity, boolean isBurning) {
         var level = entity.level;
         var pos = entity.worldPosition;

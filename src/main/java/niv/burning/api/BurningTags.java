@@ -1,13 +1,16 @@
 package niv.burning.api;
 
+import org.jspecify.annotations.NullMarked;
+
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 
 /**
  * Provides this library own tags.
  */
+@NullMarked
 public final class BurningTags {
 
     /**
@@ -17,7 +20,7 @@ public final class BurningTags {
     public static final TagKey<Block> BLACKLIST;
 
     static {
-        BLACKLIST = TagKey.create(Registries.BLOCK, ResourceLocation.tryParse("burning:blacklist"));
+        BLACKLIST = TagKey.create(Registries.BLOCK, Identifier.parse("burning:blacklist"));
     }
 
     private BurningTags() {
