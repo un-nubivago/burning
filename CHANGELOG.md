@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
++ Added logging statements inside the dynamic storage parsing login for better troubleshooting.
+
 ## [3.0] - 2026-01-11
 
 ### Changed
