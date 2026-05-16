@@ -1,5 +1,9 @@
 package niv.burning.impl;
 
+import static niv.burning.impl.Burning.LOGGER;
+import static niv.burning.impl.Burning.MOD_NAME;
+
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -22,7 +26,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
-@SuppressWarnings("null")
 @NullMarked
 final class DynamicFurnaceStorageProvider
         implements BiFunction<@NonNull BlockEntity, @Nullable Direction, DynamicFurnaceStorage> {
@@ -55,26 +58,52 @@ final class DynamicFurnaceStorageProvider
         return new DynamicFurnaceStorage(this, entity);
     }
 
-    static final @Nullable DynamicFurnaceStorageProvider from(BlockEntityType<?> type, String litTime, String litDuration) {
+    @SuppressWarnings("null")
+    static final @Nullable DynamicFurnaceStorageProvider from(
+            BlockEntityType<?> type, String litTime, String litDuration) {
         Optional<@NonNull Class<?>> optional = ((BlockEntityTypeAccessor) type).getBlocks()
                 .stream().findAny()
                 .map(Block::defaultBlockState)
                 .map(state -> type.create(BlockPos.ZERO, state))
                 .map(Object::getClass);
-        if (optional.isPresent()) {
-            var clazz = optional.get();
-            var litTimeField = Optional.ofNullable(FieldUtils
-                    .getField(clazz, litTime, true))
-                    .flatMap(DynamicField::of);
 
-            var litDurationField = Optional.ofNullable(FieldUtils
-                    .getField(clazz, litDuration, true))
-                    .flatMap(DynamicField::of);
+        var typeName = LOGGER.isInfoEnabled()
+                ? Objects.toString(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(type))
+                : null;
 
-            if (litTimeField.isPresent() && litDurationField.isPresent()) {
-                return new DynamicFurnaceStorageProvider(type, litTimeField.get(), litDurationField.get());
-            }
+        if (optional.isEmpty()) {
+            LOGGER.warn("[{}] Failed to load dynamic storage for type {}, failed to get block entity class instance",
+                    MOD_NAME, typeName);
+            return null;
         }
-        return null;
+
+        var clazz = optional.get();
+
+        var litTimeField = Optional.ofNullable(FieldUtils
+                .getField(clazz, litTime, true))
+                .flatMap(DynamicField::of);
+
+        if (litTimeField.isEmpty()) {
+            LOGGER.warn(
+                    "[{}] Failed to load dynamic storage for type {}, field {} of class {} not found",
+                    MOD_NAME, typeName, litTime, clazz.getCanonicalName());
+            return null;
+        }
+
+        var litDurationField = Optional.ofNullable(FieldUtils
+                .getField(clazz, litDuration, true))
+                .flatMap(DynamicField::of);
+
+        if (litDurationField.isEmpty()) {
+            LOGGER.warn(
+                    "[{}] Failed to load dynamic storage for type {}, field {} of class {} not found",
+                    MOD_NAME, typeName, litDuration, clazz.getCanonicalName());
+            return null;
+        }
+
+        LOGGER.info("[{}] Dynamic storage for type {} successfully loaded",
+                MOD_NAME, typeName);
+
+        return new DynamicFurnaceStorageProvider(type, litTimeField.get(), litDurationField.get());
     }
 }
