@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [3.1] - 2026-09-09
+
 ### Added
 
 + Added logging statements inside the dynamic storage parsing logic for better troubleshooting.
@@ -100,7 +102,8 @@
 
 Alpha release.
 
-[Unreleased]: https://github.com/un-nubivago/burning/compare/3.0...HEAD
+[Unreleased]: https://github.com/un-nubivago/burning/compare/3.1...HEAD
+[3.1]: https://github.com/un-nubivago/burning/compare/3.0...3.1
 [3.0]: https://github.com/un-nubivago/burning/compare/2.0...3.0
 [2.0]: https://github.com/un-nubivago/burning/compare/1.1+1.21.6...2.0
 [1.1+1.21.6]: https://github.com/un-nubivago/burning/compare/1.0+1.21.4...1.1+1.21.6
