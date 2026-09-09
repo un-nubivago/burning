@@ -4,7 +4,11 @@
 
 ### Added
 
-+ Added logging statements inside the dynamic storage parsing login for better troubleshooting.
++ Added logging statements inside the dynamic storage parsing logic for better troubleshooting.
+
+## Fixed
+
++ Fixed required Minecraft version limiting future versions.
 
 ## [3.0] - 2026-01-11
 
