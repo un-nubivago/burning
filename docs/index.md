@@ -52,16 +52,16 @@ To do so, create a data pack as follows:
 │   └── <datapack_name>
 │       └── burning
 │           └── dynamic_storage
-│               └── strange_mod:strange_furnace_type.json
-│               └── another_mod:another_furnace_type.json
+│               └── strange_furnace_type.json
+│               └── another_furnace_type.json
 │               └── ...
 ├── pack.mcmeta
 └── pack.png (optional)
 ```
 
-(Obviously, instead of `strange_mod:strange_furnace_type` and the other one, you should put the id of the furnace block entity.)
+(You can actually call the files under `dynamic_storage` however you like.)
 
-Where a file like `strange_mod:strange_furnace_type` will look something like:
+Where a file like `strange_furnace_type.json` will look something like:
 
 ```json
 {
