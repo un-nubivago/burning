@@ -96,13 +96,14 @@
 
 Alpha release.
 
-[3.0]: https://github.com/un-nubivago/burning/releases/tag/3.0
-[2.0]: https://github.com/un-nubivago/burning/releases/tag/2.0
-[1.1+1.21.6]: https://github.com/un-nubivago/burning/releases/tag/1.0+1.21.4
-[1.0+1.21.4]: https://github.com/un-nubivago/burning/releases/tag/1.0+1.21.4
-[1.0+1.21.2]: https://github.com/un-nubivago/burning/releases/tag/1.0+1.21.2
-[1.0+1.21]: https://github.com/un-nubivago/burning/releases/tag/1.0+1.21
-[0.4]: https://github.com/un-nubivago/burning/releases/tag/0.4
-[0.3]: https://github.com/un-nubivago/burning/releases/tag/0.3
-[0.2]: https://github.com/un-nubivago/burning/releases/tag/0.2
+[Unreleased]: https://github.com/un-nubivago/burning/compare/3.0...HEAD
+[3.0]: https://github.com/un-nubivago/burning/compare/2.0...3.0
+[2.0]: https://github.com/un-nubivago/burning/compare/1.1+1.21.6...2.0
+[1.1+1.21.6]: https://github.com/un-nubivago/burning/compare/1.0+1.21.4...1.1+1.21.6
+[1.0+1.21.4]: https://github.com/un-nubivago/burning/compare/1.0+1.21.2...1.0+1.21.4
+[1.0+1.21.2]: https://github.com/un-nubivago/burning/compare/1.0+1.21...1.0+1.21.2
+[1.0+1.21]: https://github.com/un-nubivago/burning/compare/0.4...1.0+1.21
+[0.4]: https://github.com/un-nubivago/burning/compare/0.3...0.4
+[0.3]: https://github.com/un-nubivago/burning/compare/0.2...0.3
+[0.2]: https://github.com/un-nubivago/burning/compare/0.1...0.2
 [0.1]: https://github.com/un-nubivago/burning/releases/tag/0.1
